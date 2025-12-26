@@ -11,6 +11,10 @@
 6.  **URL 编解码**: URL Encode/Decode。
 7.  **工具调用统计**: 查看工具使用热度与趋势。
 
+## 在线体验地址：
+https://tools.sonic.nyc.mn/
+
+
 ## 🚀 快速开始
 
 ### 本地运行
@@ -30,7 +34,7 @@
 3.  访问 `http://localhost:8080`
 
 ### 🐳 Docker 部署 (推荐)
-
+##  镜像： isolac/tools:latest
 这个项目已完全容器化。
 
 #### 1. 构建镜像
