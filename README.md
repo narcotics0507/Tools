@@ -43,7 +43,7 @@ docker build -t tools:v1.0.2 .
 
 #### 2. 启动容器 (持久化数据)
 为了防止重启容器后**统计数据丢失**，需要挂载 `/data` 目录：
-####  可直接拉取最新镜像： isolac/tools:latest
+####  可直接拉取最新镜像： isolatec/tools:latest
 ```bash
 docker run -d \
   --name my-tools \
