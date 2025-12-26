@@ -1,0 +1,151 @@
+/* frontend/src/style.css */
+
+/* 引入 Inter 字体 (精致、现代) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* --- 2025 精致版变量 --- */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+  --bg-body: #f9fafb;          /* 极简灰白 */
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #374151;     /* 柔和深灰，不刺眼 */
+  --text-secondary: #6b7280;
+  --accent: #2563eb;           /* 专业蓝 */
+  --accent-light: rgba(37, 99, 235, 0.08);
+  --border-color: #e5e7eb;     /* 极细边框色 */
+  --sidebar-width: 200px;      /* 缩窄侧边栏 */
+  --radius-sm: 6px;            /* 小圆角，更硬朗 */
+  --radius-md: 8px;
+}
+
+/* 全局重置：基准字号下调至 13px */
+html, body {
+  margin: 0; padding: 0; height: 100%; width: 100%;
+  font-family: var(--font-sans);
+  background-color: var(--bg-body);
+  color: var(--text-primary);
+  font-size: 13px;             /* <--- 核心改变：更小 */
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#app, #app-container { height: 100%; width: 100%; display: flex; overflow: hidden; }
+
+/* 强制统一控件字体与大小 */
+input, button, textarea, select {
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* --- 侧边栏 (Compact) --- */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex; flex-direction: column; flex-shrink: 0; z-index: 20;
+}
+
+.brand {
+  height: 56px; /* 降低高度 */
+  display: flex; align-items: center; padding: 0 20px;
+  font-size: 14px; font-weight: 600; gap: 10px; color: #111827;
+  letter-spacing: -0.01em;
+}
+
+.brand-icon {
+  width: 24px; height: 24px; background: #111827; color: white;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: bold;
+}
+
+.nav-menu { padding: 12px; margin: 0; flex-grow: 1; list-style: none; }
+
+.nav-item {
+  padding: 8px 12px; /* 缩小内边距 */
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center;
+  font-size: 13px; color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  margin-bottom: 2px; font-weight: 500;
+}
+
+.nav-item:hover { background-color: #f3f4f6; color: #111827; }
+.nav-item.active { background-color: var(--accent-light); color: var(--accent); font-weight: 600; }
+.nav-item svg { width: 16px; height: 16px; margin-right: 10px; stroke-width: 1.5px; }
+
+/* --- 内容区 --- */
+.main-content {
+  flex-grow: 1; padding: 24px; /* 减少留白 */
+  overflow-y: auto;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px; /* 卡片更紧凑 */
+  margin-bottom: 20px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+  font-size: 14px; font-weight: 600; color: #111827;
+  margin-bottom: 16px; display: flex; align-items: center;
+}
+
+/* --- 控件优化 (精致感来源) --- */
+.btn {
+  height: 32px; /* <--- 核心：降低高度 */
+  padding: 0 14px;
+  font-size: 12px; font-weight: 500;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer; transition: all 0.15s;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-primary { background-color: #111827; color: white; }
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btn-outline { background: #fff; border-color: var(--border-color); color: var(--text-primary); }
+.btn-outline:hover { border-color: #d1d5db; background-color: #f9fafb; }
+
+.btn-blue { background-color: var(--accent); color: white; }
+.btn-blue:hover { background-color: #1d4ed8; }
+
+textarea, input, select {
+  width: 100%;
+  padding: 6px 10px; /* 缩小输入框内边距 */
+  height: 32px;      /* 固定高度，对齐按钮 */
+  font-size: 13px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  outline: none; transition: all 0.15s;
+  background: #fff; color: var(--text-primary);
+}
+textarea { height: auto; line-height: 1.5; padding: 10px; }
+
+textarea:focus, input:focus, select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.code-area, input[class*="mono"] { font-family: var(--font-mono) !important; font-size: 12px; }
+
+/* --- Crond 网格 (微型化) --- */
+.tab-bar { display: flex; gap: 2px; padding: 3px; background: #f3f4f6; border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px; }
+.tab-btn { padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text-secondary); transition: 0.15s; font-weight: 500;}
+.tab-btn.active { background: #fff; color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 260px; }
+.grid-item { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; transition: all 0.1s; }
+.grid-item:hover { border-color: var(--accent); color: var(--accent); }
+.grid-item.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }

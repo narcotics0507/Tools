@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上校工具箱</title>
+    <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
+    <style>
+        :root {
+            --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: "SF Mono", "ui-monospace", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+            --bg-body: #f8f9fa;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-tertiary: #999999;
+            --accent: #2563eb;
+            --accent-light: rgba(37, 99, 235, 0.08);
+            --border-color: #e5e5e5;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --sidebar-width: 200px;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: var(--font-sans); background-color: var(--bg-body);
+            color: var(--text-primary); margin: 0; display: flex; height: 100vh;
+            font-size: 13px; line-height: 1.5; overflow: hidden; -webkit-font-smoothing: antialiased;
+        }
+
+        #app { display: flex; width: 100%; height: 100%; }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: var(--sidebar-width); background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; flex-shrink: 0; z-index: 10;
+        }
+        .brand { height: 60px; cursor: pointer; display: flex; align-items: center; padding: 0 20px; font-size: 14px; font-weight: 700; gap: 10px; }
+        .brand-icon { width: 24px; height: 24px; background: var(--text-primary); color: white; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .nav-menu { list-style: none; padding: 12px; margin: 0; flex-grow: 1; }
+        .nav-item { padding: 8px 12px; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; font-size: 13px; color: var(--text-secondary); border-radius: 6px; margin-bottom: 2px; }
+        .nav-item:hover { background-color: #f3f4f6; color: var(--text-primary); }
+        .nav-item.active { background-color: var(--accent-light); color: var(--accent); font-weight: 600; }
+        .nav-item svg { width: 16px; height: 16px; margin-right: 10px; stroke-width: 2px; }
+
+        /* 内容区 */
+        .main-content { flex-grow: 1; padding: 24px; overflow-y: auto; position: relative; }
+        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+        .section-header { font-size: 14px; font-weight: 600; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; gap: 8px; }
+
+        /* 公共样式 */
+        .btn { height: 32px; padding: 0 12px; font-size: 12px; font-weight: 500; border-radius: 6px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap; }
+        .btn-primary { background-color: var(--text-primary); color: white; }
+        .btn-outline { background: #fff; border-color: var(--border-color); color: var(--text-primary); }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        textarea, input { width: 100%; padding: 8px 12px; font-size: 13px; font-family: var(--font-mono); border: 1px solid var(--border-color); border-radius: 6px; outline: none; }
+
+        .dual-pane { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 400px; }
+        .pane { display: flex; flex-direction: column; gap: 8px; height: 100%; }
+        .code-area { flex: 1; resize: none; background: #fff; line-height: 1.6; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; font-family: var(--font-mono); }
+
+        /* JSON 高亮 */
+        .json-key { color: #9333ea; } .json-string { color: #059669; } .json-number { color: #2563eb; } .json-boolean { color: #dc2626; } .json-null { color: #9ca3af; }
+
+        /* Crond 专用样式 */
+        .tab-bar { display: flex; gap: 4px; padding: 4px; background: #f1f5f9; border-radius: 8px; width: fit-content; margin-bottom: 16px; }
+        .tab-btn { padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; border: 1px solid transparent; transition: 0.2s; }
+        .tab-btn.active { background: #fff; color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        .month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; max-width: 320px; }
+        .grid-item { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; }
+        .grid-item:hover { border-color: var(--accent); color: var(--accent); }
+        .grid-item.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        .toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px); background: #fff; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid var(--border-color); opacity: 0; transition: all 0.3s; z-index: 100; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div class="toast" :class="{ show: toast.show }">✅ {{ toast.message }}</div>
+
+    <nav class="sidebar">
+        <div class="brand" @click="currentTab = 'announcement'">
+            <div class="brand-icon">S</div>
+            上校工具箱
+        </div>
+        <ul class="nav-menu">
+            <li v-for="tab in tabs" :key="tab.id" class="nav-item" :class="{ active: currentTab === tab.id }" @click="currentTab = tab.id">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" v-html="tab.icon"></svg> {{ tab.name }}
+            </li>
+        </ul>
+        <div style="padding:12px; font-size:10px; color:#ccc; text-align:center;">v1.0.5</div>
+    </nav>
+
+    <main class="main-content">
+        <div v-show="currentTab === 'announcement'">
+            <div class="card">
+                <div class="section-header">系统公告</div>
+                <div v-for="log in logs" :key="log.version" style="margin-bottom: 20px; border-left: 2px solid var(--accent); padding-left: 15px;">
+                    <div style="font-weight:700;">Version {{ log.version }}</div>
+                    <div style="font-size:11px; color:#999; margin-bottom:8px;">{{ log.date }}</div>
+                    <ul style="margin:0; padding-left:15px; color:#555;">
+                        <li v-for="item in log.changes">{{ item }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div v-show="currentTab === 'timestamp'">
+            <div class="card">
+                <div class="section-header">实时钟 & 批量转换</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+                    <div @click="copy(now.bj)" style="cursor:pointer; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+                        <div style="font-size:10px; color:#999;">北京时间</div>
+                        <div style="font-family:var(--font-mono); font-weight:700;">{{ now.bj }}</div>
+                    </div>
+                    <div @click="copy(now.ts)" style="cursor:pointer; padding:12px; border:1px solid var(--border-color); border-radius:8px; border-left:3px solid var(--accent);">
+                        <div style="font-size:10px; color:#999;">UNIX 时间戳</div>
+                        <div style="font-family:var(--font-mono); font-weight:700; color:var(--accent);">{{ now.ts }}</div>
+                    </div>
+                </div>
+                <textarea v-model="batchTsInput" placeholder="输入多行时间戳，支持空行..." style="height:120px; margin-bottom:12px;"></textarea>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-primary" @click="batchConvertTs">批量转换</button>
+                    <button class="btn btn-outline" @click="exportBatchCsv">导出 CSV</button>
+                    <button class="btn btn-outline" @click="batchTsInput=''; batchOutput=''">清空</button>
+                </div>
+                <textarea v-model="batchOutput" readonly style="height:180px; background:#f9fafb; margin-top:12px;"></textarea>
+            </div>
+        </div>
+
+        <div v-show="currentTab === 'cron'">
+            <div class="card">
+                <div class="section-header">Crond 表达式生成器</div>
+                <div class="tab-bar">
+                    <div class="tab-btn" :class="{active: cron.mode==='daily'}" @click="cron.mode='daily'">每天</div>
+                    <div class="tab-btn" :class="{active: cron.mode==='weekly'}" @click="cron.mode='weekly'">每周</div>
+                    <div class="tab-btn" :class="{active: cron.mode==='monthly'}" @click="cron.mode='monthly'">每月</div>
+                </div>
+
+                <div style="display:flex; gap:32px; padding:20px; background:#fafafa; border-radius:8px; border:1px solid #eee; margin-bottom:20px;">
+                    <div style="flex:1;">
+                        <div v-if="cron.mode==='daily'" style="color:#999;">任务将在每天指定时间执行。</div>
+
+                        <div v-if="cron.mode==='weekly'">
+                            <div style="font-size:12px; color:#888; margin-bottom:10px;">选择星期：</div>
+                            <div style="display:flex; gap:6px;">
+                                <button v-for="d in weekDays" :key="d.val" class="btn"
+                                        :class="cron.week === d.val ? 'btn-primary':'btn-outline'"
+                                        @click="cron.week = d.val" style="flex:1;">{{ d.label }}</button>
+                            </div>
+                        </div>
+
+                        <div v-if="cron.mode==='monthly'">
+                            <div style="font-size:12px; color:#888; margin-bottom:10px;">选择日期：</div>
+                            <div class="month-grid">
+                                <div v-for="n in 31" :key="n" class="grid-item"
+                                     :class="{active: parseInt(cron.day) === n}"
+                                     @click="cron.day = n.toString()">{{ n }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="width:140px; border-left:1px dashed #ddd; padding-left:32px;">
+                        <div style="font-size:12px; color:#888; margin-bottom:10px;">执行时间：</div>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <select v-model="cron.hour" style="flex:1;"><option v-for="h in 24" :value="(h-1).toString().padStart(2,'0')">{{(h-1).toString().padStart(2,'0')}}</option></select>
+                            <span>:</span>
+                            <select v-model="cron.minute" style="flex:1;"><option v-for="m in 60" :value="(m-1).toString().padStart(2,'0')">{{(m-1).toString().padStart(2,'0')}}</option></select>
+                        </div>
+                    </div>
+                </div>
+
+                <div @click="copy(cronResultString); reportEvent('cron', 'copy_result')" style="background:#1a1a1a; color:#4ade80; padding:18px; text-align:center; font-family:var(--font-mono); font-size:20px; border-radius:8px; cursor:pointer; letter-spacing:1px;">
+                    {{ cronResultString }}
+                </div>
+                <div style="text-align:center; font-size:11px; color:#999; margin-top:8px;">点击黑色区域即可快速复制</div>
+            </div>
+        </div>
+
+        <div v-show="currentTab === 'url'">
+            <div class="card">
+                <div class="section-header">URL 编解码</div>
+                <div class="dual-pane">
+                    <div class="pane">
+                        <textarea class="code-area" v-model="urlInput" placeholder="输入原始内容..."></textarea>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-primary" @click="urlEncode">编码</button>
+                            <button class="btn btn-outline" @click="urlDecode">解码</button>
+                        </div>
+                    </div>
+                    <div class="pane">
+                        <textarea class="code-area" v-model="urlOutput" readonly style="background:#f9fafb;"></textarea>
+                        <button class="btn btn-outline" @click="copy(urlOutput)">复制结果</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-show="currentTab === 'json'">
+            <div class="card">
+                <div class="section-header">JSON 格式化 & 高亮</div>
+                <div class="dual-pane">
+                    <div class="pane">
+                        <textarea class="code-area" v-model="jsonInput" placeholder="粘贴 JSON..."></textarea>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn btn-primary" @click="jsonFormat">格式化</button>
+                            <button class="btn btn-outline" @click="jsonMinify">压缩</button>
+                        </div>
+                    </div>
+                    <div class="pane">
+                        <div class="code-area" style="background:#f9fafb; overflow:auto; white-space:pre-wrap;" v-html="jsonResult || '等待转换...'"></div>
+                        <button class="btn btn-outline" @click="copy(jsonRaw)">复制原文</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-show="currentTab === 'crypto'">
+            <div class="card">
+                <div class="section-header">加解密工具 (BASE64)</div>
+                <textarea v-model="crypto.base64In" placeholder="输入内容..." style="height:100px; margin-bottom:10px;"></textarea>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-primary" @click="base64Encode">编码</button>
+                    <button class="btn btn-outline" @click="base64Decode">解码</button>
+                </div>
+                <textarea v-model="crypto.base64Out" readonly style="height:100px; background:#f9fafb; margin-top:10px;"></textarea>
+            </div>
+    </main>
+</div>
+
+<script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+        setup() {
+            const currentTab = ref('timestamp');
+            const toast = ref({ show: false, message: '' });
+
+            // --- 新增：混合模式数据上报 (Hybrid Reporting) ---
+            const reportEvent = (tool, action, errorMsg = '') => {
+                // 使用 fetch 发送，不关心结果，不阻塞
+                fetch('/api/event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tool_name: tool,
+                        action: action,
+                        is_error: !!errorMsg,
+                        error_msg: errorMsg
+                    })
+                }).catch(err => {
+                    // 默默失败，不打扰用户
+                });
+            };
+
+            const tabs = [
+                { id: 'announcement', name: '公告页', icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>' },
+                { id: 'timestamp', name: '时间戳工具', icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
+                { id: 'url', name: 'URL 编解码', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>' },
+                { id: 'json', name: 'JSON 工具', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' },
+                { id: 'cron', name: 'Crond 生成器', icon: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/>' },
+                { id: 'crypto', name: '加解密', icon: '<rect x="3" y="11" width="18" height="11" rx="2"></rect>' }
+            ];
+
+            const logs = [
+                { version: '1.0.5', date: '2025-12-22', changes: ['回归：Crond 每月执行日期回归为 31 天网格点击选择模式', '集成：URL、JSON、Crypto 模块完整逻辑接入'] },
+                { version: '1.0.3', date: '2025-12-22', changes: ['修复：导出 CSV 即使存在空行也保留序号占位'] }
+            ];
+
+            // --- 时间戳逻辑 ---
+            const now = ref({ bj: '', ts: 0 });
+            const updateClock = () => {
+                const d = new Date();
+                const z = n => n < 10 ? '0' + n : n;
+                now.value.bj = `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}:${z(d.getSeconds())}`;
+                now.value.ts = Math.floor(d.getTime() / 1000);
+            };
+            setInterval(updateClock, 1000); updateClock();
+
+            const batchTsInput = ref(''); const batchOutput = ref('');
+            const batchConvertTs = () => {
+                reportEvent('timestamp', 'batch_convert'); // 埋点
+                const lines = batchTsInput.value.split(/\r?\n/);
+                batchOutput.value = lines.map((line, i) => {
+                    const raw = line.trim();
+                    const idx = (i + 1).toString().padStart(3, ' ');
+                    if (!raw) return `${idx} |                 | `;
+                    const n = Number(raw);
+                    const d = new Date(raw.replace('-', '').length <= 10 ? n * 1000 : n);
+                    return `${idx} | ${raw.padEnd(15)} | ${isNaN(d) ? '无效' : d.toLocaleString()}`;
+                }).join('\n');
+            };
+            const exportBatchCsv = () => {
+                reportEvent('timestamp', 'export_csv'); // 埋点
+                const lines = batchTsInput.value.split(/\n/);
+                let csv = '\ufeff序号,时间戳,结果\r\n';
+                lines.forEach((line, i) => {
+                    const raw = line.trim();
+                    if (!raw) { csv += `${i + 1},,""\r\n`; return; } //
+                    const n = Number(raw);
+                    const d = new Date(raw.replace('-', '').length <= 10 ? n * 1000 : n);
+                    csv += `${i + 1},${raw},"${isNaN(d) ? '无效' : d.toLocaleString()}"\r\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = 'Toolbox_Export.csv'; a.click();
+            };
+
+            // --- URL 逻辑 ---
+            const urlInput = ref(''); const urlOutput = ref('');
+            const urlEncode = () => {
+                urlOutput.value = encodeURIComponent(urlInput.value);
+                reportEvent('url', 'encode'); // 埋点
+            };
+            const urlDecode = () => {
+                try {
+                    urlOutput.value = decodeURIComponent(urlInput.value);
+                    reportEvent('url', 'decode_success'); // 埋点
+                } catch(e) {
+                    urlOutput.value = 'Error';
+                    reportEvent('url', 'decode_error', e.message); // 埋点
+                }
+            };
+
+            // --- JSON 逻辑 ---
+            const jsonInput = ref(''); const jsonResult = ref(''); const jsonRaw = ref('');
+            const jsonFormat = () => {
+                try {
+                    const obj = JSON.parse(jsonInput.value);
+                    jsonRaw.value = JSON.stringify(obj, null, 4);
+                    jsonResult.value = jsonRaw.value.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
+                        let cls = 'json-number';
+                        if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-string'; }
+                        else if (/true|false/.test(match)) { cls = 'json-boolean'; }
+                        else if (/null/.test(match)) { cls = 'json-null'; }
+                        return `<span class="${cls}">${match}</span>`;
+                    });
+                    reportEvent('json', 'format_success'); // 埋点
+                } catch(e) {
+                    jsonResult.value = 'JSON 解析失败';
+                    reportEvent('json', 'format_error', e.message); // 埋点
+                }
+            };
+            const jsonMinify = () => {
+                try {
+                    jsonRaw.value = JSON.stringify(JSON.parse(jsonInput.value));
+                    jsonResult.value = jsonRaw.value;
+                    reportEvent('json', 'minify'); // 埋点
+                } catch { }
+            };
+
+            // --- Cron 逻辑 (修复网格样式) ---
+            const cron = ref({ mode: 'daily', week: '1', day: '1', hour: '00', minute: '00' });
+            const weekDays = [{ val: '1', label: '一' }, { val: '2', label: '二' }, { val: '3', label: '三' }, { val: '4', label: '四' }, { val: '5', label: '五' }, { val: '6', label: '六' }, { val: '0', label: '日' }];
+            const cronResultString = computed(() => {
+                let d = '*', w = '*';
+                if (cron.value.mode === 'weekly') w = cron.value.week;
+                if (cron.value.mode === 'monthly') d = cron.value.day;
+                return `${parseInt(cron.value.minute)} ${parseInt(cron.value.hour)} ${d} * ${w}`;
+            });
+
+            // --- Crypto 逻辑 ---
+            const crypto = ref({ mode: 'base64', base64In: '', base64Out: '' });
+            const base64Encode = () => {
+                crypto.value.base64Out = btoa(unescape(encodeURIComponent(crypto.value.base64In)));
+                reportEvent('crypto', 'b64_encode'); // 埋点
+            };
+            const base64Decode = () => {
+                try {
+                    crypto.value.base64Out = decodeURIComponent(escape(atob(crypto.value.base64In)));
+                    reportEvent('crypto', 'b64_decode_success'); // 埋点
+                } catch(e) {
+                    crypto.value.base64Out = 'Error';
+                    reportEvent('crypto', 'b64_decode_error', e.message); // 埋点
+                }
+            };
+
+            const copy = async (t) => {
+                if (!t) return;
+                await navigator.clipboard.writeText(String(t));
+                toast.value = { show: true, message: '已复制' };
+                setTimeout(() => toast.value.show = false, 2000);
+            };
+
+            // 将 reportEvent 暴露给模板使用（虽然上面大部分是在 JS 里调用的，但 Crond 用到了）
+            return {
+                currentTab, tabs, logs, toast, now, copy, reportEvent,
+                batchTsInput, batchOutput, batchConvertTs, exportBatchCsv,
+                urlInput, urlOutput, urlEncode, urlDecode,
+                jsonInput, jsonResult, jsonRaw, jsonFormat, jsonMinify,
+                cron, weekDays, cronResultString,
+                crypto, base64Encode, base64Decode
+            };
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>
