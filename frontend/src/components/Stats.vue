@@ -95,7 +95,8 @@ const lineOptions = {
     maintainAspectRatio: false,
     scales: {
         y: {
-            ticks: { color: '#6b7280' },
+            beginAtZero: true,
+            ticks: { color: '#6b7280', stepSize: 1 },
             grid: { color: '#e5e7eb' }
         },
         x: {
@@ -106,6 +107,15 @@ const lineOptions = {
     plugins: {
         legend: {
             labels: { color: '#374151' }
+        }
+    },
+    elements: {
+        point: {
+            radius: 5,
+            hoverRadius: 7
+        },
+        line: {
+            tension: 0.4
         }
     }
 }
