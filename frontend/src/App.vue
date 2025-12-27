@@ -79,7 +79,7 @@ const selectTab = (id) => {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" v-html="tab.icon"></svg> {{ tab.name }}
         </li>
       </ul>
-      <div style="padding:16px; font-size:11px; color:#9ca3af; text-align:center; margin-top: auto;">v1.0.3 (Modular)</div>
+      <div style="padding:16px; font-size:11px; color:#9ca3af; text-align:center; margin-top: auto;">v1.0.4</div>
     </nav>
 
     <main class="main-content">
