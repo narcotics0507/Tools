@@ -101,7 +101,7 @@ func main() {
 				Scan(&results)
 			c.JSON(http.StatusOK, gin.H{
 				"total_tools_usage": results,
-				"server_time":       time.Now().Format(time.DateTime),
+				"server_time":       time.Now().In(time.FixedZone("CST", 8*3600)).Format(time.DateTime),
 			})
 		})
 
@@ -118,7 +118,7 @@ func main() {
 				Group("date, tool_name").
 				Order("date asc").
 				Scan(&results)
-			
+
 			c.JSON(http.StatusOK, gin.H{"trend": results})
 		})
 	}

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import {
   Chart as ChartJS,
   Title,
@@ -21,13 +21,59 @@ const trendData = ref([])
 const serverTime = ref('')
 const loading = ref(true)
 
+let timer = null
+let timeOffset = 0
+
+const updateTime = () => {
+    const now = Date.now()
+    const serverNow = new Date(now + timeOffset)
+    // Format: YYYY-MM-DD HH:mm:ss
+    const pad = (n) => n.toString().padStart(2, '0')
+    const year = serverNow.getFullYear()
+    const month = pad(serverNow.getMonth() + 1)
+    const day = pad(serverNow.getDate())
+    const hour = pad(serverNow.getHours())
+    const minute = pad(serverNow.getMinutes())
+    const second = pad(serverNow.getSeconds())
+    serverTime.value = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+}
+
 const fetchData = async () => {
     loading.value = true
     try {
         const resStats = await fetch('/api/stats').then(r => r.json())
         stats.value = resStats.total_tools_usage || []
-        serverTime.value = resStats.server_time
         
+        // Calculate offset
+        // Parse server time (YYYY-MM-DD HH:mm:ss) to timestamp
+        // Note: Replacing space with T might be needed for reliable parsing across browsers if ISO format isn't strictly followed, 
+        // but given the Go format time.DateTime ("2006-01-02 15:04:05"), 
+        // we can parse it carefully or trust new Date() in modern browsers.
+        // Let's manually parse to be safe and avoid timezone issues (assuming server sends "local" time which we want to display as-is)
+        // Actually, the server sends a string representing "CST". Ideally we display THAT time.
+        // If we just do new Date(resStats.server_time), browser might interpret it as local time or UTC.
+        // Let's stick to the server string as the anchor.
+        
+        const serverStr = resStats.server_time.replace(' ', 'T') // Make it ISO-like
+        // We know server is +08:00. 
+        // If we treat it as a string, we can just parse the components.
+        
+        // Better approach for visual "tick":
+        // 1. Parse server string components.
+        // 2. Construct a Date object representing that moment.
+        // 3. Compare with Date.now() to get offset.
+        
+        const [dStr, tStr] = resStats.server_time.split(' ')
+        const [y, m, d] = dStr.split('-').map(Number)
+        const [hh, mm, ss] = tStr.split(':').map(Number)
+        const serverDate = new Date(y, m - 1, d, hh, mm, ss)
+        
+        timeOffset = serverDate.getTime() - Date.now()
+        
+        updateTime() // Initial update
+        if (timer) clearInterval(timer)
+        timer = setInterval(updateTime, 1000)
+
         const resTrend = await fetch('/api/stats/trend').then(r => r.json())
         trendData.value = resTrend.trend || []
     } catch (e) {
@@ -36,6 +82,10 @@ const fetchData = async () => {
         loading.value = false
     }
 }
+
+onUnmounted(() => {
+    if (timer) clearInterval(timer)
+})
 
 const chartColors = ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#F7DF1E', '#3178C6', '#9B59B6', '#34495E']
 
