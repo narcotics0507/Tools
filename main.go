@@ -8,9 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/time/rate"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -19,6 +21,53 @@ import (
 //
 //go:embed dist/*
 var staticFiles embed.FS
+
+// --- 1.2 Rate Limiter ---
+type IPRateLimiter struct {
+	ips map[string]*rate.Limiter
+	mu  *sync.RWMutex
+	r   rate.Limit
+	b   int
+}
+
+func NewIPRateLimiter(r rate.Limit, b int) *IPRateLimiter {
+	return &IPRateLimiter{
+		ips: make(map[string]*rate.Limiter),
+		mu:  &sync.RWMutex{},
+		r:   r,
+		b:   b,
+	}
+}
+
+func (i *IPRateLimiter) GetLimiter(ip string) *rate.Limiter {
+	i.mu.Lock()
+	defer i.mu.Unlock()
+
+	limiter, exists := i.ips[ip]
+	if !exists {
+		limiter = rate.NewLimiter(i.r, i.b)
+		i.ips[ip] = limiter
+	}
+
+	return limiter
+}
+
+var limiter = NewIPRateLimiter(5, 10) // 5 req/s, burst 10
+
+func RateLimitMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ip := c.ClientIP()
+		if !limiter.GetLimiter(ip).Allow() {
+			c.JSON(http.StatusTooManyRequests, gin.H{
+				"status":  "error",
+				"message": "Too many requests",
+			})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
 
 // --- 2. 数据库结构定义 ---
 type UserEvent struct {
@@ -76,7 +125,7 @@ func main() {
 	// 1. API 接口
 	api := r.Group("/api")
 	{
-		api.POST("/event", func(c *gin.Context) {
+		api.POST("/event", RateLimitMiddleware(), func(c *gin.Context) {
 			var evt UserEvent
 			if err := c.ShouldBindJSON(&evt); err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
