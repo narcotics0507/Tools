@@ -2,23 +2,39 @@
 import { ref } from 'vue'
 
 const props = defineProps(['reportEvent'])
-const count = ref(1)
-const result = ref('')
 
+// ==========================================
+// 状态定义
+// ==========================================
+const count = ref(1)    // 生成数量
+const result = ref('') // 结果字符串
+
+// ==========================================
+// 逻辑处理
+// ==========================================
+
+// 生成 UUID (v4)
 const generate = () => {
     try {
         const uuids = []
         for (let i = 0; i < count.value; i++) {
+            // 使用浏览器原生的 crypto.randomUUID()
+            // 相比旧的 Math.random() 实现，这个更加安全且唯一性更有保障
             uuids.push(crypto.randomUUID())
         }
+        // 多行显示
         result.value = uuids.join('\n')
+        
+        // 上报生成数量作为元数据
         props.reportEvent('uuid', 'generate', count.value.toString())
     } catch (e) {
+        // 部分旧浏览器可能不支持 crypto.randomUUID (需要 localhost 或 HTTPS 上下文)
         result.value = "Error: " + e.message
         props.reportEvent('uuid', 'error', e.message)
     }
 }
 
+// 复制结果
 const copy = () => {
     if (!result.value) return
     navigator.clipboard.writeText(result.value)

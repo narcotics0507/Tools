@@ -1,7 +1,9 @@
 <script setup>
 import { ref, watch } from 'vue'
+import { debounce } from '../utils/debounce'
 
 const props = defineProps(['reportEvent'])
+
 const input = ref('')
 const hashes = ref({
     md5: '',
@@ -9,17 +11,23 @@ const hashes = ref({
     sha256: ''
 })
 
-// Use Web Crypto API
+// ==========================================
+// 1. 哈希算法实现
+// ==========================================
+
+// 使用浏览器原生 Web Crypto API 计算 SHA 系列哈希 (现代浏览器标准支持)
 const computeHash = async (text, algorithm) => {
     const encoder = new TextEncoder()
     const data = encoder.encode(text)
     const hashBuffer = await crypto.subtle.digest(algorithm, data)
     const hashArray = Array.from(new Uint8Array(hashBuffer))
+    // 将字节数组转为 16 进制字符串
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-// Simple MD5 implementation (since Web Crypto doesn't support MD5 widely anymore as it's insecure)
-// Source: https://github.com/blueimp/JavaScript-MD5 (Simplified for single file)
+// 简易 MD5 实现
+// 注意：Web Crypto API 出于安全性考虑，通常不再原生支持 MD5，因此需要自带 JS 实现。
+// 来源: https://github.com/blueimp/JavaScript-MD5 (简化版)
 const md5 = (string) => {
     function rotateLeft(lValue, iShiftBits) {
         return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
@@ -90,6 +98,7 @@ const md5 = (string) => {
     }
     var x = Array();
     var k, AA, BB, CC, DD, a, b, c, d;
+    // MD5 常量
     var S11 = 7, S12 = 12, S13 = 17, S14 = 22;
     var S21 = 5, S22 = 9, S23 = 14, S24 = 20;
     var S31 = 4, S32 = 11, S33 = 16, S34 = 23;
@@ -171,21 +180,28 @@ const md5 = (string) => {
     return temp.toLowerCase();
 }
 
+// 监听输入变化，实时计算 Hash
 watch(input, async (newVal) => {
     if (!newVal) {
         hashes.value = { md5: '', sha1: '', sha256: '' }
         return
     }
     
-    // MD5 - Custom func
+    // MD5 - 使用自定义函数
     hashes.value.md5 = md5(newVal)
     
-    // SHA - Web Crypto
+    // SHA - 使用 Web Crypto API (异步)
     hashes.value.sha1 = await computeHash(newVal, 'SHA-1')
     hashes.value.sha256 = await computeHash(newVal, 'SHA-256')
     
-    props.reportEvent('hash', 'calculate')
+    // 使用防抖上报，避免频繁打点
+    debouncedReport('hash', 'calculate')
 })
+
+// 创建防抖的上报函数
+const debouncedReport = debounce((type, action) => {
+    props.reportEvent(type, action)
+}, 2000)
 
 const copyHash = (text) => {
     navigator.clipboard.writeText(text)
@@ -200,6 +216,7 @@ const copyHash = (text) => {
     <textarea v-model="input" class="input-area" placeholder="输入内容实时计算..."></textarea>
     
     <div class="hash-list">
+        <!-- MD5 结果 -->
         <div class="hash-item">
             <div class="label">MD5</div>
             <div class="value-row">
@@ -208,6 +225,7 @@ const copyHash = (text) => {
             </div>
         </div>
         
+        <!-- SHA1 结果 -->
         <div class="hash-item">
             <div class="label">SHA1</div>
             <div class="value-row">
@@ -216,6 +234,7 @@ const copyHash = (text) => {
             </div>
         </div>
         
+        <!-- SHA256 结果 -->
         <div class="hash-item">
             <div class="label">SHA256</div>
             <div class="value-row">

@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+
+// 引入各个功能组件
 import Announcement from './components/Announcement.vue'
 import TimestampTool from './components/TimestampTool.vue'
 import JsonTool from './components/JsonTool.vue'
@@ -7,15 +9,26 @@ import CronTool from './components/CronTool.vue'
 import UrlTool from './components/UrlTool.vue'
 import CryptoTool from './components/CryptoTool.vue'
 import Stats from './components/Stats.vue'
-
 import RegexTool from './components/RegexTool.vue'
 import UuidTool from './components/UuidTool.vue'
 import HashTool from './components/HashTool.vue'
 import DiffTool from './components/DiffTool.vue'
 
+// ==========================================
+// 1. 状态管理
+// ==========================================
+
+// 当前选中的 Tab (默认为公告页)
 const currentTab = ref('announcement')
+
+// 移动端菜单的开关状态
 const isMobileMenuOpen = ref(false)
 
+// ==========================================
+// 2. 菜单配置
+// ==========================================
+
+// 定义侧边栏菜单项 (ID, 名称, 图标 SVG)
 const tabs = [
   { id: 'announcement', name: '公告页', icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>' },
   { id: 'diff', name: '文本对比', icon: '<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M3 21l8.5-8.5"></path>'},
@@ -23,15 +36,23 @@ const tabs = [
   { id: 'url', name: 'URL 编解码', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>' },
   { id: 'json', name: 'JSON 工具', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' },
   { id: 'cron', name: 'Crond 生成器', icon: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4"/>' },
-
   { id: 'regex', name: '正则测试', icon: '<path d="M21 12H3M7 8l-4 4 4 4M17 8l4 4-4 4"/>' },
   { id: 'uuid', name: 'UUID 生成器', icon: '<rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="8.5" r="1.5"></circle><circle cx="15.5" cy="15.5" r="1.5"></circle><circle cx="8.5" cy="15.5" r="1.5"></circle>' },
   { id: 'hash', name: '哈希计算器', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>' },
-
   { id: 'crypto', name: '加解密 & Base64', icon: '<rect x="3" y="11" width="18" height="11" rx="2"></rect>' },
   { id: 'stats', name: '工具调用统计', icon: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>' }
 ]
 
+// ==========================================
+// 3. 通用方法
+// ==========================================
+
+/**
+ * 上报用户行为事件到后端
+ * @param {string} tool - 工具名称 (如 json, diff)
+ * @param {string} action - 动作名称 (如 operate, click)
+ * @param {string} errorMsg - 错误信息 (可选)
+ */
 const reportEvent = (tool, action, errorMsg = '') => {
   fetch('/api/event', {
     method: 'POST',
@@ -45,19 +66,23 @@ const reportEvent = (tool, action, errorMsg = '') => {
   }).catch(err => console.log('上报忽略'))
 }
 
+// 切换移动端菜单显示/隐藏
 const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
 
+// 选中 Tab 并关闭移动端菜单
 const selectTab = (id) => {
     currentTab.value = id
-    isMobileMenuOpen.value = false // Close menu on selection
+    isMobileMenuOpen.value = false // 选中后自动收起菜单
 }
 </script>
 
 <template>
   <div id="app-container">
-    <!-- Mobile Header -->
+    <!-- ========================================== -->
+    <!-- 移动端顶部导航栏 (仅在小屏幕显示) -->
+    <!-- ========================================== -->
     <div class="mobile-header">
         <div class="brand-mobile">
             <div class="brand-icon">S</div>
@@ -68,15 +93,19 @@ const selectTab = (id) => {
         </button>
     </div>
 
-    <!-- Mobile Overlay -->
+    <!-- 移动端菜单遮罩层 -->
     <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="isMobileMenuOpen = false"></div>
 
+    <!-- ========================================== -->
+    <!-- 侧边栏导航 (Sidebar) -->
+    <!-- ========================================== -->
     <nav class="sidebar" :class="{ 'mobile-open': isMobileMenuOpen }">
       <div class="brand" @click="selectTab('announcement')">
         <div class="brand-icon">S</div>
         上校工具箱
       </div>
       <ul class="nav-menu">
+        <!-- 遍历生成菜单项 -->
         <li v-for="tab in tabs" :key="tab.id" class="nav-item" :class="{ active: currentTab === tab.id }" @click="selectTab(tab.id)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" v-html="tab.icon"></svg> {{ tab.name }}
         </li>
@@ -84,7 +113,11 @@ const selectTab = (id) => {
       <div style="padding:16px; font-size:11px; color:#9ca3af; text-align:center; margin-top: auto;">v1.0.5</div>
     </nav>
 
+    <!-- ========================================== -->
+    <!-- 主内容区域 (Main Content) -->
+    <!-- ========================================== -->
     <main class="main-content">
+        <!-- 动态渲染当前选中的组件 -->
         <Announcement v-if="currentTab === 'announcement'" />
         <DiffTool v-if="currentTab === 'diff'" :report-event="reportEvent" />
         <TimestampTool v-if="currentTab === 'timestamp'" :report-event="reportEvent" />
@@ -103,17 +136,19 @@ const selectTab = (id) => {
 </template>
 
 <style>
-/* Global Resets & Variables */
+/* ========================================== */
+/* 全局样式与变量定义 */
+/* ========================================== */
 :root {
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --bg-page: #f3f4f6;
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --border-color: #e5e7eb;
-  --accent: #f59e0b; /* Amber for highlights */
+  --primary: #2563eb;       /* 主色调 (蓝色) */
+  --primary-hover: #1d4ed8; /* 悬停深蓝 */
+  --bg-page: #f3f4f6;       /* 页面背景灰 */
+  --bg-sidebar: #ffffff;    /* 侧边栏白 */
+  --bg-card: #ffffff;       /* 卡片白 */
+  --text-primary: #111827;  /* 主要文字黑 */
+  --text-secondary: #6b7280;/* 次要文字灰 */
+  --border-color: #e5e7eb;  /* 边框颜色 */
+  --accent: #f59e0b;        /* 强调色 (Amber) */
   --radius-sm: 6px;
   --radius-md: 8px;
 }
@@ -131,7 +166,9 @@ body {
   min-height: 100vh;
 }
 
-/* Sidebar */
+/* ========================================== */
+/* 侧边栏样式 */
+/* ========================================== */
 .sidebar {
   width: 260px;
   background: var(--bg-sidebar);
@@ -206,19 +243,23 @@ body {
 }
 
 .nav-item.active {
-  background-color: #eff6ff; /* Light blue */
+  background-color: #eff6ff; /* 选中状态淡蓝背景 */
   color: var(--primary);
 }
 
-/* Main Content */
+/* ========================================== */
+/* 主内容区域样式 */
+/* ========================================== */
 .main-content {
   flex: 1;
-  margin-left: 260px; /* Width of sidebar */
+  margin-left: 260px; /* 留出侧边栏宽度 */
   padding: 32px;
   max-width: 100%;
 }
 
-/* Mobile Specifics */
+/* ========================================== */
+/* 移动端适配样式 (Max-width: 768px) */
+/* ========================================== */
 .mobile-header {
     display: none;
     height: 60px;
@@ -267,18 +308,17 @@ body {
     z-index: 45;
 }
 
-/* Responsive Media Queries */
 @media (max-width: 768px) {
     .sidebar {
-        transform: translateX(-100%); /* Hide by default */
+        transform: translateX(-100%); /* 默认隐藏侧边栏 */
         box-shadow: 2px 0 8px rgba(0,0,0,0.1);
     }
     .sidebar.mobile-open {
-        transform: translateX(0);
+        transform: translateX(0); /* 打开时滑入 */
     }
     .main-content {
         margin-left: 0;
-        margin-top: 60px; /* Header height */
+        margin-top: 60px; /* 留出顶部导航高度 */
         padding: 16px;
     }
     .mobile-header {

@@ -1,40 +1,54 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-// ✅ 使用新库：cron-schedule (原生支持 Vite，零报错)
+// ✅ 引用 cron-schedule 库进行 Cron 表达式解析和预测
 import { parseCronExpression } from 'cron-schedule'
 
 const props = defineProps(['reportEvent'])
 
+// ==========================================
+// 1. 状态定义
+// ==========================================
+// cron 对象存储生成器的当前状态: 模式(每天/每周/每月), 周几, 日期, 小时, 分钟
 const cron = ref({ mode: 'daily', week: '1', day: '1', hour: '00', minute: '00' })
+
+// 反解析输入框的值
 const cronInputStr = ref('')
+// 预测的未来执行时间列表
 const nextRuns = ref([])
+// 解析错误信息
 const parseError = ref('')
 
+// 星期几的映射 (0=周日, 1=周一)
 const weekDays = [{ val: '1', label: '一' }, { val: '2', label: '二' }, { val: '3', label: '三' }, { val: '4', label: '四' }, { val: '5', label: '五' }, { val: '6', label: '六' }, { val: '0', label: '日' }]
 
+// ==========================================
+// 2. 计算与逻辑
+// ==========================================
+
+// 根据当前 cron 对象的状态生成的 Crond 表达式字符串
 const cronResultString = computed(() => {
   let d = '*', w = '*'
   if (cron.value.mode === 'weekly') w = cron.value.week
   if (cron.value.mode === 'monthly') d = cron.value.day
+  // 格式: 分 时 日 月 周
   return `${parseInt(cron.value.minute)} ${parseInt(cron.value.hour)} ${d} * ${w}`
 })
 
-// 🔥 核心重写：使用 cron-schedule 预测时间
+// 🔥 核心功能：预测未来 5 次运行时间
 const predictNextRuns = (expression) => {
   try {
     parseError.value = ''
-    // 1. 解析表达式
+    // 1. 使用库解析表达式
     const cronJob = parseCronExpression(expression)
 
-    // 2. 计算未来 5 次运行时间
+    // 2. 循环计算未来 5 次
     const times = []
-    let lastDate = new Date() // 从当前时间开始
+    let lastDate = new Date() // 起始时间为当前
 
     for (let i = 0; i < 5; i++) {
-      // 获取下一次时间
       const next = cronJob.getNextDate(lastDate)
       times.push(next.toString())
-      lastDate = next // 下一次基于这一次继续算
+      lastDate = next // 下一次基于这一次继续往后算
     }
     nextRuns.value = times
   } catch (err) {
@@ -43,17 +57,20 @@ const predictNextRuns = (expression) => {
   }
 }
 
+// 监听输入框变化，自动触发预测
 watch(cronInputStr, (newVal) => { if(newVal) predictNextRuns(newVal) })
 
+// 按钮点击事件：解析用户输入的 Cron 字符串并回填到 UI
 const parseCronString = () => {
   try {
     const str = cronInputStr.value.trim()
     if (!str) return
     predictNextRuns(str)
 
-    // 如果解析失败，不回填 UI
+    // 如果表达式本身非法，就不尝试回填 UI 了
     if (parseError.value) return
 
+    // 简单的空格分割解析 (注意：这只能处理简单的 5 段式标准 Cron)
     const p = str.split(/\s+/)
     if (p.length < 5) throw new Error("Length < 5")
 
@@ -63,16 +80,19 @@ const parseCronString = () => {
     const d = p[2]
     const w = p[4]
 
+    // 根据字段判断当前是哪种模式
     if (w !== '*' && w !== '?') { cron.value.mode = 'weekly'; cron.value.week = getFirst(w) }
     else if (d !== '*' && d !== '?') { cron.value.mode = 'monthly'; cron.value.day = getFirst(d) }
     else { cron.value.mode = 'daily' }
+    
     props.reportEvent('cron', 'parse_success')
   } catch (e) {
-    // 这里的错误通常是 split 分割导致的，非 cron 解析错误
+    // 解析失败通常是因为表达式太复杂 (如区间、列表等)，UI无法完全还原，仅报错日志
     console.log(e)
   }
 }
 
+// 复制结果到剪贴板
 const copyResult = () => {
   navigator.clipboard.writeText(cronResultString.value)
   props.reportEvent('cron', 'copy_result')
@@ -84,6 +104,7 @@ const copyResult = () => {
   <div class="card">
     <div class="section-header">Crond 表达式助手</div>
 
+    <!-- 顶部：反解析面板 -->
     <div class="panel">
       <label class="label">输入表达式 (反解析)</label>
       <div style="display: flex; gap: 8px;">
@@ -91,6 +112,7 @@ const copyResult = () => {
         <button class="btn btn-blue" @click="parseCronString">解析并回填</button>
       </div>
 
+      <!-- 预测结果显示区域 -->
       <div style="margin-top: 12px; min-height: 20px;">
         <div v-if="parseError" class="error-msg">{{ parseError }}</div>
         <div v-else-if="nextRuns.length > 0">
@@ -104,7 +126,10 @@ const copyResult = () => {
       </div>
     </div>
 
+    <!-- 中部：可视化生成器 -->
     <div class="section-header" style="margin-top: 24px; border: none; margin-bottom: 12px;">可视化生成</div>
+    
+    <!-- 模式切换 Tab -->
     <div class="tab-bar">
       <div class="tab-btn" :class="{active: cron.mode==='daily'}" @click="cron.mode='daily'">每天</div>
       <div class="tab-btn" :class="{active: cron.mode==='weekly'}" @click="cron.mode='weekly'">每周</div>
@@ -112,8 +137,10 @@ const copyResult = () => {
     </div>
 
     <div class="generator-box">
+      <!-- 左侧：日期选择控件 -->
       <div class="left-controls">
         <div v-if="cron.mode==='daily'" class="desc-text">任务将在每天指定时间执行。</div>
+        
         <div v-if="cron.mode==='weekly'">
           <div class="sub-label">选择星期</div>
           <div style="display:flex; gap:6px;">
@@ -122,6 +149,7 @@ const copyResult = () => {
                     @click="cron.week = d.val" style="flex:1;">{{ d.label }}</button>
           </div>
         </div>
+        
         <div v-if="cron.mode==='monthly'">
           <div class="sub-label">选择日期</div>
           <div class="month-grid">
@@ -132,6 +160,7 @@ const copyResult = () => {
         </div>
       </div>
 
+      <!-- 右侧：时间选择控件 -->
       <div class="time-picker">
         <div class="sub-label">执行时间</div>
         <div style="display:flex; align-items:center; gap:4px;">
@@ -142,6 +171,7 @@ const copyResult = () => {
       </div>
     </div>
 
+    <!-- 底部：结果展示条 -->
     <div @click="copyResult" class="result-bar">
       {{ cronResultString }}
     </div>
@@ -157,7 +187,7 @@ const copyResult = () => {
 .error-msg { color: #ef4444; font-size: 12px; }
 .desc-text { color:#6b7280; font-size:13px; }
 
-/* 布局修复 */
+/* 布局修复: 使左右控件在小屏下堆叠，大屏下并排 */
 .generator-box {
   display: flex;
   gap: 24px;
@@ -174,7 +204,7 @@ const copyResult = () => {
   min-width: 280px;
 }
 
-/* 强制不压缩右侧 */
+/* 强制不压缩右侧时间选择器 */
 .time-picker {
   flex: 0 0 240px;
   border-left: 1px dashed #e5e7eb;

@@ -1,4 +1,8 @@
 <script setup>
+// ==========================================
+// 系统更新日志配置
+// ==========================================
+// 倒序排列：最新的版本放在最前面
 const logs = [
   { version: '1.0.5', date: '2025-12-29', changes: ['新增“文本对比”工具 (基于 Monaco Editor)', '优化 JSON 工具体验 (树形视图、折叠支持)', '新增 API 速率限制，防止恶意调用'] },
   { version: '1.0.4', date: '2025-12-27', changes: ['修复移动端显示异常问题','新增UUID生成器'] },
@@ -12,6 +16,8 @@ const logs = [
 <template>
   <div class="card">
     <div class="section-header">系统公告</div>
+    
+    <!-- 遍历渲染日志列表 -->
     <div v-for="log in logs" :key="log.version" style="margin-bottom: 20px; border-left: 2px solid var(--accent); padding-left: 15px;">
       <div style="font-weight:700;">Version {{ log.version }}</div>
       <div style="font-size:11px; color:#999; margin-bottom:8px;">{{ log.date }}</div>

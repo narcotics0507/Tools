@@ -1,26 +1,31 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { debounce } from '../utils/debounce'
 
 const props = defineProps(['reportEvent'])
 
-const pattern = ref('\\d+')
-const flags = ref('g')
-const testString = ref('Hello 123 World 456')
+// ==========================================
+// 1. 状态定义
+// ==========================================
+const pattern = ref('\\d+')         // 正则表达式模式
+const flags = ref('g')              // 正则修饰符 (如 g, i, m)
+const testString = ref('Hello 123 World 456') // 待测试字符串
 
+// ==========================================
+// 2. 核心逻辑: 实时匹配与高亮
+// ==========================================
+
+// 计算属性：根据正则匹配结果生成带有 HTML 高亮的字符串
 const resultHtml = computed(() => {
     if (!pattern.value) return testString.value
     try {
         const regex = new RegExp(pattern.value, flags.value)
         const content = testString.value
         
-        // Highlight logic
-        // We wrap matches in specific spans.
-        // A simple way is to use replace callback, but we need to handle non-global regex nicely too.
-        
         let html = ''
         let lastIndex = 0
         
-        // Safe html escape
+        // 安全的 HTML 转义函数，防止 XSS
         const escapeHtml = (unsafe) => {
              return unsafe
                  .replace(/&/g, "&amp;")
@@ -30,27 +35,46 @@ const resultHtml = computed(() => {
                  .replace(/'/g, "&#039;");
         }
 
+        // 使用 replace 的回调函数来逐个处理匹配项
         content.replace(regex, (match, ...args) => {
-            const offset = args[args.length - 2] // offset is second to last arg in replace
-            // Append text before match
+            //倒数第二个参数在 replace 回调中通常是匹配项在原字符串中的偏移量 offset
+            const offset = args[args.length - 2] 
+            
+            // 1. 拼接匹配项之前的内容 (普通文本)
             html += escapeHtml(content.slice(lastIndex, offset))
-            // Append highlighted match
+            // 2. 拼接高亮处理后的匹配项
             html += `<span class="match">${escapeHtml(match)}</span>`
+            
+            // 更新下次截取的起始位置
             lastIndex = offset + match.length
             
-            // If not global, replace only runs once naturally
+            // 如果不是全局匹配 (g)，replace 只会执行一次，这里返回 match 不影响原逻辑
             return match 
         })
         
-        // Append remaining text
+        // 3. 拼接剩余未匹配的文本
         html += escapeHtml(content.slice(lastIndex))
-        
-        // Trigger report (optional: consider debouncing)
-        // props.reportEvent('regex', 'test') 
         
         return html
     } catch (e) {
+        // 如果正则语法错误，直接忽略，不crash页面，也可以显示错误提示
         return `<span class="error">正则错误: ${e.message}</span>`
+    }
+})
+
+// ==========================================
+// 3. 事件上报 (防抖)
+// ==========================================
+
+// 创建防抖上报函数
+const debouncedReport = debounce(() => {
+    props.reportEvent('regex', 'test')
+}, 2000)
+
+// 监听正则或测试文本的变化，触发上报
+watch([pattern, flags, testString], () => {
+    if (pattern.value) {
+        debouncedReport()
     }
 })
 </script>
@@ -59,6 +83,7 @@ const resultHtml = computed(() => {
   <div class="card">
     <div class="section-header">正则表达式测试</div>
     
+    <!-- 输入行: Pattern 和 Flags -->
     <div class="input-row">
         <div style="flex: 3;">
             <label>正则表达式 Pattern</label>
@@ -70,6 +95,7 @@ const resultHtml = computed(() => {
         </div>
     </div>
     
+    <!-- 双栏布局: 测试文本 vs 匹配结果 -->
     <div class="dual-pane">
       <div class="pane">
         <label>测试字符串</label>
@@ -77,6 +103,7 @@ const resultHtml = computed(() => {
       </div>
       <div class="pane">
         <label>匹配结果</label>
+        <!-- 使用 v-html 渲染包含高亮 span 的结果 -->
         <div class="code-area result-area" v-html="resultHtml"></div>
       </div>
     </div>
@@ -93,6 +120,7 @@ const resultHtml = computed(() => {
 
 label { font-size: 12px; font-weight: 500; color: #6b7280; margin-bottom: 4px; display: block; }
 
+/* 深度选择器，用于匹配 v-html 动态生成的 .match 类 */
 :deep(.match) { background-color: #fef08a; border-radius: 2px; box-shadow: 0 0 0 1px #facc15; }
 :deep(.error) { color: #ef4444; font-weight: bold; }
 </style>

@@ -1,23 +1,30 @@
 <script setup>
-import { ref, shallowRef, watch } from 'vue'
+import { ref, shallowRef } from 'vue'
+// 使用 Vue 封装的 Monaco Diff Editor 组件
 import { VueMonacoDiffEditor } from '@guolao/vue-monaco-editor'
 
 const props = defineProps(['reportEvent'])
 
-const original = ref('')
-const modified = ref('')
+// ==========================================
+// 1. 状态定义
+// ==========================================
+const original = ref('')  // 左侧原始文本
+const modified = ref('')  // 右侧修改后文本
 
-// Debounce logic could be added if performance is an issue, 
-// but for text diffs, Monaco handles updates reasonably well.
-// We will bind v-model directly.
+// 编辑器实例引用 (shallowRef 用于性能优化，避免深度响应式)
+const editorRef = shallowRef()
 
+// ==========================================
+// 2. Monaco Editor 配置
+// ==========================================
 const OPTIONS = {
-  originalEditable: true, 
-  readOnly: false,        
-  renderSideBySide: true,
-  minimap: { enabled: false }, // Disable minimap to save space in split view
-  scrollBeyondLastLine: false,
-  automaticLayout: true,
+  originalEditable: true, // 允许编辑左侧原始文本 (默认通常是只读的，这里开启方便双向修改)
+  readOnly: false,        // 允许编辑右侧
+  renderSideBySide: true, // 并排显示模式 (Inline 为 false)
+  minimap: { enabled: false }, // 禁用缩略图，节省空间
+  scrollBeyondLastLine: false, // 禁止滚动超过最后一行
+  automaticLayout: true,  // 自动响应容器大小变化
+  // 自定义滚动条样式，使其更窄且不显眼
   scrollbar: {
     verticalScrollbarSize: 6,
     horizontalScrollbarSize: 6,
@@ -25,14 +32,19 @@ const OPTIONS = {
     horizontalSliderSize: 6,
     useShadows: false
   },
-  wordWrap: 'on'
+  wordWrap: 'on' // 开启自动换行
 }
 
-const editorRef = shallowRef()
+// ==========================================
+// 3. 事件处理
+// ==========================================
 
+// 编辑器挂载完成后的回调
 const handleMount = (diffEditor) => {
   editorRef.value = diffEditor
-  // Force update options to ensure scrollbar styles are applied
+  
+  // 强制更新子编辑器的选项，确保滚动条样式生效
+  // Monaco Diff Editor 由两个独立的 Code Editor 组成
   const modifiedEditor = diffEditor.getModifiedEditor();
   const originalEditor = diffEditor.getOriginalEditor();
   
@@ -48,12 +60,14 @@ const handleMount = (diffEditor) => {
   originalEditor.updateOptions({ scrollbar: scrollbarOptions, wordWrap: 'on' });
 }
 
+// 复制右侧结果
 const copyResult = () => {
     navigator.clipboard.writeText(modified.value)
     alert('已复制修改后的文本')
     props.reportEvent('diff', 'copy')
 }
 
+// 清空两侧内容
 const clear = () => {
     original.value = ''
     modified.value = ''
@@ -66,7 +80,7 @@ const clear = () => {
         <span>文本差异比对</span>
     </div>
 
-    <!-- Toolbar -->
+    <!-- 顶部工具栏 -->
     <div class="toolbar">
         <div class="left-tip">
             ✨ 实时对比模式：请在下方输入文本，差异将自动显示。
@@ -78,9 +92,9 @@ const clear = () => {
         </div>
     </div>
 
-    <!-- Main Content: Split Vertical -->
+    <!-- 主内容区：垂直分割布局 -->
     <div class="split-container">
-        <!-- Top: Inputs -->
+        <!-- 上半部分：文本输入框 (各自占 35% 高度) -->
         <div class="input-container">
             <div class="input-box">
                 <div class="label">原始文本</div>
@@ -92,7 +106,7 @@ const clear = () => {
             </div>
         </div>
 
-        <!-- Bottom: Diff Editor -->
+        <!-- 下半部分：Diff 编辑器 (占剩余空间) -->
         <div class="editor-wrapper">
              <div class="label-bar">对比结果 (Diff View)</div>
              <VueMonacoDiffEditor
@@ -110,6 +124,7 @@ const clear = () => {
 </template>
 
 <style scoped>
+/* 撑满除了顶部导航外的高度 */
 .full-height {
     display: flex;
     flex-direction: column;
@@ -153,7 +168,7 @@ const clear = () => {
     overflow: hidden;
 }
 
-/* Update: Input take 35%, Editor take 65% */
+/* 输入区域高度占比 35% */
 .input-container {
     height: 35%; 
     display: flex;
@@ -186,8 +201,8 @@ const clear = () => {
     border-radius: var(--radius-sm);
     outline: none;
     line-height: 1.4;
-    white-space: pre-wrap;       /* Preserve whitespace/returns */
-    overflow-wrap: break-word;     /* Break long words if needed */
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
 }
 
 .text-area:focus {
@@ -219,7 +234,7 @@ const clear = () => {
     font-size: 12px;
 }
 
-/* Custom Scrollbar */
+/* 自定义滚动条 (Webkit) */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -236,7 +251,7 @@ const clear = () => {
 }
 </style>
 
-/* Global Monaco Overrides - placed here to ensure they load with the component */
+<!-- 全局 Monaco 样式覆盖 (必须是非 scoped 才能生效) -->
 <style>
 .monaco-editor .scrollbar .slider {
     background: #e5e7eb !important;
@@ -247,11 +262,10 @@ const clear = () => {
 .monaco-editor .scrollbar .slider:hover {
     background: #d1d5db !important;
 }
-/* Hide the decorations ruler which can look like a thick border/shadow */
+/* 隐藏 Monaco 编辑器左侧的装饰标尺，减少视觉干扰 */
 .monaco-editor .decorationsOverviewRuler {
     display: none !important;
 }
-/* Ensure the scrollbar container itself is not too wide/intrusive */
 .monaco-editor .scrollbar.vertical {
     width: 6px !important;
     background: transparent !important;
