@@ -1,58 +1,57 @@
-# 🧰 上校工具箱 (Colonel's Toolbox)
-
-一个基于 **Go (Gin)** 和 **Vue 3** 的现代化、轻量级开发者工具箱。整合了日常开发中高频使用的各种实用工具，由 `isolatec/tools` 镜像提供支持。
-
-## ✨ 功能特性
-
-本项目目前包含以下 10+ 款实用工具：
-
-1.  **JSON 工具箱**
-    *   支持 JSON 格式化、压缩、语法高亮。
-    *   提供左右分栏的实时对比和编辑体验。
-2.  **文本/代码对比 (Diff Tool)**
-    *   左右分栏实时比对文本差异。
-    *   支持代码高亮，直观展示新增、删除和修改内容。
-3.  **加解密 & Base64**
-    *   支持 Base64 快速编解码。
-    *   集成 AES、DES、RSA 等常见加密/解密算法。
-4.  **正则测试 (Regex Tester)**
-    *   实时正则表达式匹配与高亮显示。
-    *   即时验证正则逻辑的正确性。
-5.  **哈希计算 (Hashing)**
-    *   支持 MD5, SHA1, SHA256, SHA512 等常见哈希算法。
-    *   快速计算文件或文本指纹。
-6.  **Cron 表达式**
-    *   可视化生成 Crond 表达式。
-    *   反向解析表达式含义，不仅是生成器也是学习工具。
-7.  **时间戳转换**
-    *   双向转换：时间戳 (秒/毫秒) ↔ 日期时间。
-    *   自动获取当前时间，方便调试。
-8.  **URL 编解码**
-    *   快速进行 URL Encode 和 Decode 操作。
-9.  **UUID 生成器**
-    *   批量生成 UUID (v1, v4)。
-    *   支持自定义分隔符和大小写。
-10. **工具调用统计**
-    *   内置数据看板，展示工具使用热度与趋势。
-    *   支持通过图表查看近 7 天的使用情况。
-
-> 🛡️ **安全机制**: 所有 API 接口均已启用 IP 速率限制 (Rate Limiting)，有效防止恶意刷量和滥用。
+<div align="center">
+  <h1>🚀 上校工具箱 (Colonel's Toolbox)</h1>
+  <p>
+    <strong>现代 · 轻量 · 全能</strong>
+  </p>
+  <p>
+    基于 <strong>Go (Gin)</strong> 和 <strong>Vue 3</strong> 构建的开发者效能神器
+  </p>
+  <p>
+    <a href="https://github.com/narcotics0507/Tools/stargazers"><img src="https://img.shields.io/github/stars/narcotics0507/Tools?color=ffcb47&labelColor=black&style=for-the-badge" alt="Stars"></a>
+    <a href="https://github.com/narcotics0507/Tools/network/members"><img src="https://img.shields.io/github/forks/narcotics0507/Tools?color=blue&labelColor=black&style=for-the-badge" alt="Forks"></a>
+    <a href="https://github.com/narcotics0507/Tools/blob/master/LICENSE"><img src="https://img.shields.io/github/license/narcotics0507/Tools?color=green&labelColor=black&style=for-the-badge" alt="License"></a>
+    <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/docker/pulls/isolatec/tools?color=blue&labelColor=black&style=for-the-badge" alt="Docker Pulls"></a>
+  </p>
+  <p>
+    <a href="https://tools.sonic.nyc.mn/">🌐 在线体验</a> •
+    <a href="#-快速部署">🚀 快速部署</a> •
+    <a href="#-功能概览">✨ 功能概览</a>
+  </p>
+</div>
 
 ---
 
-## 🌐 在线体验
+## 📖 项目简介
 
-**演示地址**: [https://tools.sonic.nyc.mn/](https://tools.sonic.nyc.mn/)
+**上校工具箱** 是一款专为开发者打造的现代化工具集合。它摆脱了传统且臃肿的工具站模式，采用前后端分离架构，以极简的 Docker 镜像交付。
+无论是本地开发调试，还是私有化部署在内网环境，它都能为您提供 **安全**、**快速**、**纯净** 的工具服务。
+
+> 🛡️ **安全承诺**: 所有 API 均内置 IP 速率限制 (Rate Limiting)，有效防御恶意扫描与滥用。
+
+---
+
+## ✨ 功能概览
+
+| 工具模块 | 功能描述 | 核心亮点 |
+| :--- | :--- | :--- |
+| **🎨 JSON 工具箱** | JSON 格式化、压缩、转义 | 支持左右分栏实时编辑与对比 |
+| **⚖️ 差异比对 (Diff)** | 文本/代码差异检测 | Monaco Editor 驱动，支持多种语言高亮 |
+| **🔐 加解密 & Base64** | AES / DES / RSA / Base64 | 常用算法一站式解决 |
+| **🧩 正则测试** | 正则表达式实时匹配 | 实时高亮显示，调试更直观 |
+| **#️⃣ 哈希计算** | MD5, SHA1, SHA256, SHA512 | 快速生成文件或文本指纹 |
+| **⏲️ Cron 表达式** | Cron 生成与反解析 | 可视化操作，不仅是工具也是教程 |
+| **📅 时间戳转换** | 秒/毫秒 ↔ 日期时间 | 自动获取当前时间，双向转换 |
+| **🔗 URL 编解码** | Encode / Decode | 快速处理 URL 参数 |
+| **🆔 UUID 生成** | 批量生成 UUID (v1, v4) | 支持自定义分隔符和大小写 |
+| **📊 调用统计** | 数据看板 | 可视化展示工具使用热度与趋势 |
 
 ---
 
 ## 🚀 快速部署
 
-### 🐳 Docker 部署 (推荐)
+本项目已完全容器化，支持 **Docker** 一键启动。
 
-本项目已完全容器化并托管于 DockerHub，推荐使用 Docker 进行一键部署。
-
-#### 方式一：直接运行
+### 🐳 方案一：Docker CLI (推荐)
 
 ```bash
 docker run -d \
@@ -62,10 +61,9 @@ docker run -d \
   isolatec/tools:latest
 ```
 
-*   `isolatec/tools:latest`: 官方最新镜像。
-*   `-v tools_data:/data`: **[强烈推荐]** 将 SQLite 数据库挂载到宿主机或 Docker Volume，确保重启后统计数据不丢失。
+*   **挂载说明**: `-v tools_data:/data` 用于持久化 SQLite 数据库，确保统计数据在容器重启后不丢失。
 
-#### 方式二：使用 Docker Compose
+### 🐳 方案二：Docker Compose
 
 ```yaml
 version: '3'
@@ -83,10 +81,12 @@ volumes:
   tools_data:
 ```
 
-#### 方式三：手动构建 (Manual Build)
+### 🛠️ 方案三：手动构建
+
+如果您需要二次开发或手动构建镜像：
 
 ```bash
-# 自动使用 goproxy.cn 加速
+# 自动使用 goproxy.cn 加速构建
 docker build -t tools:latest .
 ```
 
@@ -94,46 +94,48 @@ docker build -t tools:latest .
 
 ## 🛠️ 本地开发
 
-如果您想参与开发或进行本地调试：
+### 环境要求
+*   **Go** 1.24+
+*   **Node.js** 20+
 
-### 1. 环境准备
-*   Go 1.24+
-*   Node.js 20+
+### 启动流程
 
-### 2. 启动步骤
+1.  **构建前端**:
+    ```bash
+    cd frontend
+    npm install
+    npm run build
+    ```
 
-First, build the frontend:
-```bash
-cd frontend
-npm install
-npm run build
-```
+2.  **启动后端**:
+    ```bash
+    # 回到项目根目录
+    go mod download
+    go run main.go
+    ```
 
-Then, run the backend:
-```bash
-# 回到项目根目录
-go mod download
-go run main.go
-```
-
-访问 `http://localhost:8080` 即可看到效果。
+3.  **访问**: 打开浏览器访问 `http://localhost:8080`
 
 ---
 
 ## 📝 技术栈
 
-*   **Backend**: Go (Golang), Gin Web Framework, GORM (SQLite), Rate/Limiter
-*   **Frontend**: Vue 3, Vite, Naive UI (或相关组件库), Monaco Editor (代码编辑器核心)
-*   **Deployment**: Docker, Alpine Linux
+<p>
+  <img src="https://img.shields.io/badge/Go-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go" />
+  <img src="https://img.shields.io/badge/Gin-008ECF?style=flat-square&logo=go&logoColor=white" alt="Gin" />
+  <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat-square&logo=vue.js&logoColor=white" alt="Vue" />
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite" />
+</p>
 
 ---
 
+## 📄 开源协议
 
-## 📄 开源协议 (License)
+本项目基于 **MIT 协议** 开源。
+Copyright © 2025 narcotics0507.
 
-本项目基于 [MIT License](LICENSE) 开源。
-您可以自由地使用、修改和分发本项目，但请保留版权声明。
-
----
-
-© 2024-2025 Colonel's Toolbox. All rights reserved.
+<div align="center">
+  <p>Made with ❤️ by narcotics0507</p>
+</div>
