@@ -11,12 +11,14 @@ import Stats from './components/Stats.vue'
 import RegexTool from './components/RegexTool.vue'
 import UuidTool from './components/UuidTool.vue'
 import HashTool from './components/HashTool.vue'
+import DiffTool from './components/DiffTool.vue'
 
 const currentTab = ref('announcement')
 const isMobileMenuOpen = ref(false)
 
 const tabs = [
   { id: 'announcement', name: '公告页', icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>' },
+  { id: 'diff', name: '文本对比', icon: '<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M3 21l8.5-8.5"></path>'},
   { id: 'timestamp', name: '时间戳工具', icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
   { id: 'url', name: 'URL 编解码', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>' },
   { id: 'json', name: 'JSON 工具', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' },
@@ -84,6 +86,7 @@ const selectTab = (id) => {
 
     <main class="main-content">
         <Announcement v-if="currentTab === 'announcement'" />
+        <DiffTool v-if="currentTab === 'diff'" :report-event="reportEvent" />
         <TimestampTool v-if="currentTab === 'timestamp'" :report-event="reportEvent" />
         <JsonTool v-if="currentTab === 'json'" :report-event="reportEvent" />
         <CronTool v-if="currentTab === 'cron'" :report-event="reportEvent" />

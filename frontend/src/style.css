@@ -149,3 +149,23 @@ textarea:focus, input:focus, select:focus {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* Force Monaco Editor Scrollbar Style */
+.monaco-editor .scrollbar .slider {
+  background: #e5e7eb !important;
+  border-radius: 3px !important;
+  width: 6px !important; /* Force width */
+  left: 0 !important; /* Ensure alignment */
+}
+.monaco-editor .scrollbar .slider:hover {
+  background: #d1d5db !important;
+}
+.monaco-editor .scrollbar.vertical {
+  width: 6px !important;
+}
+.monaco-editor .scrollbar.horizontal {
+  height: 6px !important;
+}
+.monaco-editor .decorationsOverviewRuler {
+  display: none !important; /* Hide the ruler that adds width */
+}
