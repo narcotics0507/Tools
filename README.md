@@ -10,6 +10,7 @@
     <a href="https://github.com/narcotics0507/Tools/stargazers"><img src="https://img.shields.io/github/stars/narcotics0507/Tools?color=ffcb47&labelColor=black&style=for-the-badge" alt="Stars"></a>
     <a href="https://github.com/narcotics0507/Tools/network/members"><img src="https://img.shields.io/github/forks/narcotics0507/Tools?color=blue&labelColor=black&style=for-the-badge" alt="Forks"></a>
     <a href="https://github.com/narcotics0507/Tools/blob/master/LICENSE"><img src="https://img.shields.io/github/license/narcotics0507/Tools?color=green&labelColor=black&style=for-the-badge" alt="License"></a>
+    <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/docker/v/isolatec/tools?color=blue&labelColor=black&style=for-the-badge&logo=docker&logoColor=white" alt="Docker Version"></a>
     <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/docker/pulls/isolatec/tools?color=blue&labelColor=black&style=for-the-badge" alt="Docker Pulls"></a>
   </p>
   <p>
@@ -36,9 +37,14 @@
 | :--- | :--- | :--- |
 | **🎨 JSON 工具箱** | JSON 格式化、压缩、转义 | 支持左右分栏实时编辑与对比 |
 | **⚖️ 差异比对 (Diff)** | 文本/代码差异检测 | Monaco Editor 驱动，支持多种语言高亮 |
+| **🛢️ SQL 格式化** | SQL 美化、压缩 | 支持多种 SQL 方言，一键美化复杂查询 |
 | **🔐 加解密 & Base64** | AES / DES / RSA / Base64 | 常用算法一站式解决 |
 | **🧩 正则测试** | 正则表达式实时匹配 | 实时高亮显示，调试更直观 |
 | **#️⃣ 哈希计算** | MD5, SHA1, SHA256, SHA512 | 快速生成文件或文本指纹 |
+| **🔢 进制转换** | Binary / Octal / Decimal / Hex | 实时双向转换，支持大数 |
+| **📱 二维码生成** | 文本 / URL 转 QR Code | 支持自定义纠错级别和尺寸 |
+| **🎨 颜色转换** | HEX / RGB / HSL / CMYK | 开发者必备的色彩转换器 |
+| **🔠 文本工具** | 大小写 / 驼峰 / 蛇形互转 | 变量命名风格快速切换 |
 | **⏲️ Cron 表达式** | Cron 生成与反解析 | 可视化操作，不仅是工具也是教程 |
 | **📅 时间戳转换** | 秒/毫秒 ↔ 日期时间 | 自动获取当前时间，双向转换 |
 | **🔗 URL 编解码** | Encode / Decode | 快速处理 URL 参数 |
