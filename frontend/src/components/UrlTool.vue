@@ -38,24 +38,69 @@ const copy = () => {
 </script>
 
 <template>
-  <div class="card">
+  <div class="card full-height">
     <div class="section-header">URL 编解码</div>
     
     <div class="dual-pane">
       <!-- 左侧输入 -->
-      <div class="pane">
-        <textarea class="code-area" v-model="urlInput" placeholder="输入原始内容..."></textarea>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-primary" @click="urlEncode">编码</button>
-          <button class="btn btn-outline" @click="urlDecode">解码</button>
+      <div class="pane input-pane">
+        <div class="pane-content">
+            <textarea class="code-area" v-model="urlInput" placeholder="输入原始内容..."></textarea>
+        </div>
+        <div class="pane-footer">
+          <button class="btn btn-primary" @click="urlEncode">编码 (Encode)</button>
+          <button class="btn btn-outline" @click="urlDecode">解码 (Decode)</button>
         </div>
       </div>
       
       <!-- 右侧结果 -->
-      <div class="pane">
-        <textarea class="code-area" v-model="urlOutput" readonly style="background:#f9fafb;"></textarea>
-        <button class="btn btn-outline" @click="copy">复制结果</button>
+      <div class="pane output-pane">
+        <div class="pane-content">
+            <textarea class="code-area" v-model="urlOutput" readonly placeholder="转换结果..."></textarea>
+        </div>
+        <div class="pane-footer right-footer">
+            <button class="btn btn-outline" @click="copy">复制结果</button>
+        </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* 局部微调: 让 Pane 的内部布局更精致 */
+.pane {
+    background: white; /* 统一白底 */
+    display: flex;
+    flex-direction: column;
+}
+
+.pane-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0; /* Remove padding to let textarea fill */
+}
+
+.code-area {
+    width: 100%;
+    height: 100%;
+    border: none; /* Remove border from textarea, let pane handle it */
+    box-shadow: none !important;
+    padding: 16px;
+    resize: none;
+    background: transparent;
+}
+
+.pane-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #f2f2f7;
+    background: #fafafa; /* Very light gray footer */
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.right-footer {
+    justify-content: flex-end;
+}
+</style>

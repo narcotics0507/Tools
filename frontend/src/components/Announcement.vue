@@ -1,29 +1,97 @@
 <script setup>
-// ==========================================
-// 系统更新日志配置
-// ==========================================
-// 倒序排列：最新的版本放在最前面
-const logs = [
-  { version: '1.0.5', date: '2025-12-29', changes: ['新增“文本对比”工具 (基于 Monaco Editor)', '优化 JSON 工具体验 (树形视图、折叠支持)', '新增 API 速率限制，防止恶意调用'] },
-  { version: '1.0.4', date: '2025-12-27', changes: ['修复移动端显示异常问题','新增UUID生成器'] },
-  { version: '1.0.3', date: '2025-12-26', changes: ['新增“工具调用统计”功能', 'JSON 工具改为左右分栏布局', '新增 Base64、正则测试工具'] },
-  { version: '1.0.2', date: '2025-12-25', changes: ['Crond支持反解析功能'] },
-  { version: '1.0.1', date: '2025-12-22', changes: ['Crond 每月执行日期回归为 31 天网格点击选择模式', '集成：URL、JSON、Crypto 模块完整逻辑接入'] },
-  { version: '1.0.0', date: '2025-12-02', changes: ['上校工具箱 v1.0.0 正式上线'] }
-]
 </script>
 
 <template>
-  <div class="card">
-    <div class="section-header">系统公告</div>
+  <div class="announcement-container">
+    <h1>公告</h1>
     
-    <!-- 遍历渲染日志列表 -->
-    <div v-for="log in logs" :key="log.version" style="margin-bottom: 20px; border-left: 2px solid var(--accent); padding-left: 15px;">
-      <div style="font-weight:700;">Version {{ log.version }}</div>
-      <div style="font-size:11px; color:#999; margin-bottom:8px;">{{ log.date }}</div>
-      <ul style="margin:0; padding-left:15px; color:#555;">
-        <li v-for="item in log.changes">{{ item }}</li>
+    <div class="update-card">
+      <div class="version-tag">v1.0.6</div>
+      <div class="date">2026-01-04</div>
+      <ul class="change-list">
+        <li>✨ <strong>全新日期选择器</strong>: 引入 Flatpickr，交互更流畅。</li>
+        <li>📈 <strong>图表升级</strong>: 统计页趋势趋势优化，视觉更统一。</li>
       </ul>
     </div>
+
+    <div class="update-card">
+      <div class="version-tag">v1.0.5</div>
+      <div class="date">2026-01-03</div>
+      <ul class="change-list">
+        <li>✨ <strong>UI 重塑</strong>: 回归中文，采用 Apple 风格 (San Francisco 字体 / 圆角 / 阴影)。</li>
+        <li>🕒 <strong>时间戳增强</strong>: 增加日期在此转换功能 (Date -> Timestamp)。</li>
+        <li>📊 <strong>图表优化</strong>: 升级为平滑曲线面积图 (Smooth Area Chart)。</li>
+      </ul>
+    </div>
+
+    <div class="update-card">
+      <div class="version-tag">v1.0.4</div>
+      <div class="date">2025-12-29</div>
+      <ul class="change-list">
+        <li>✨ <strong>新工具</strong>: 上线 SQL 格式化、文本对比、二维码、颜色转换、进制转换、文本工具。</li>
+        <li>🛠 <strong>优化</strong>: 导航栏重构，支持移动端适配。</li>
+      </ul>
+    </div>
+
   </div>
 </template>
+
+<style scoped>
+.announcement-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #111827;
+}
+
+.update-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.version-tag {
+  display: inline-block;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.date {
+  position: absolute;
+  top: 28px;
+  right: 24px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.change-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #374151;
+}
+
+.change-list li {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+strong {
+  color: #111827;
+  font-weight: 600;
+}
+</style>

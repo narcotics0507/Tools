@@ -75,8 +75,7 @@ const copy = () => {
 </template>
 
 <style scoped>
-.dual-pane { display: flex; gap: 16px; height: 300px; margin-top: 16px; }
-.pane { flex: 1; display: flex; flex-direction: column; }
+/* Global .dual-pane used */
 .code-area { flex: 1; resize: none; }
 .controls { display: flex; gap: 16px; font-size: 14px; }
 .controls label { cursor: pointer; display: flex; align-items: center; gap: 4px; }

@@ -112,9 +112,6 @@ watch([pattern, flags, testString], () => {
 
 <style scoped>
 .input-row { display: flex; gap: 16px; margin-bottom: 16px; }
-.text-input { height: 38px; }
-.dual-pane { display: flex; gap: 16px; height: 300px; }
-.pane { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .code-area { flex: 1; resize: none; font-size: 14px; padding: 12px; }
 .result-area { background: white; overflow: auto; white-space: pre-wrap; word-break: break-all; border: 1px solid #e5e7eb; }
 

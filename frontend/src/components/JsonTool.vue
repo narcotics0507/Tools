@@ -74,7 +74,7 @@ const compress = () => {
 <template>
   <div class="card full-height">
     <div class="section-header">
-        <span>JSON 编辑器 (类似 json.cn)</span>
+        <span>JSON 格式化</span>
     </div>
 
     <!-- 控制栏：开关与按钮 -->
@@ -111,7 +111,7 @@ const compress = () => {
        <!-- 展开层级选择 -->
        <div class="center-group">
           <span class="label-text">默认展开:</span>
-          <select v-model="deep" class="select-box">
+          <select v-model="deep">
               <option :value="1">1层</option>
               <option :value="2">2层</option>
               <option :value="3">3层</option>
@@ -122,9 +122,9 @@ const compress = () => {
 
        <!-- 操作按钮 -->
        <div class="actions-group">
-          <button class="btn btn-sm btn-outline" @click="compress">压缩</button>
-          <button class="btn btn-sm btn-primary" @click="handleJsonChange">格式化</button>
-          <button class="btn btn-sm btn-outline" @click="copyResult">复制结果</button>
+          <button class="btn btn-outline" @click="compress">压缩</button>
+          <button class="btn btn-primary" @click="handleJsonChange">格式化</button>
+          <button class="btn btn-outline" @click="copyResult">复制结果</button>
        </div>
     </div>
 
@@ -162,11 +162,7 @@ const compress = () => {
 </template>
 
 <style scoped>
-.full-height {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 100px);
-}
+
 
 .controls-bar {
     display: flex;
@@ -189,14 +185,7 @@ const compress = () => {
     white-space: nowrap;
 }
 
-.select-box {
-    padding: 4px 8px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    outline: none;
-    cursor: pointer;
-}
+
 
 /* 开关样式 (Toggle Switch) */
 .toggle-label {
@@ -315,8 +304,5 @@ input:checked + .slider:before {
     margin-top: 40px;
 }
 
-.btn-sm {
-    padding: 4px 12px;
-    font-size: 12px;
-}
+
 </style>

@@ -10,350 +10,501 @@ import {
   LinearScale,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
+  Filler
 } from 'chart.js'
 import { Pie, Line } from 'vue-chartjs'
 
-// 注册 Chart.js 组件，必须在使用前注册
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement)
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement, PointElement, LineElement, Filler)
 
-// ==========================================
 // 1. 响应式状态
-// ==========================================
-const stats = ref([])         // 工具总调用统计数据
-const trendData = ref([])     // 7日趋势数据
-const serverTime = ref('')    // 显示给用户的服务器时间字符串
-const loading = ref(true)     // 加载状态
+const stats = ref([])         
+const trendData = ref([])     
+const timerTime = ref('')     
+const timerDate = ref('')     
+const loading = ref(true)     
 
-// 定时器引用，用于组件销毁时清除
 let timer = null
-// 本地时间与服务器时间的偏移量 (毫秒)
-// 用于在本地准确显示服务器时间，不受本地时钟误差影响
 let timeOffset = 0
 
-// ==========================================
-// 2. 时间同步逻辑
-// ==========================================
-
-// updateTime 每秒执行一次，利用 timeOffset 计算准确的服务器时间
+// 2. 时间逻辑
 const updateTime = () => {
     const now = Date.now()
-    // 计算当前的服务器时间 = 本地时间 + 偏移量
     const serverNow = new Date(now + timeOffset)
     
-    // 格式化为 YYYY-MM-DD HH:mm:ss
+    // Apple 风格：简洁
     const pad = (n) => n.toString().padStart(2, '0')
-    const year = serverNow.getFullYear()
-    const month = pad(serverNow.getMonth() + 1)
-    const day = pad(serverNow.getDate())
     const hour = pad(serverNow.getHours())
     const minute = pad(serverNow.getMinutes())
     const second = pad(serverNow.getSeconds())
-    
-    serverTime.value = `${year}-${month}-${day} ${hour}:${minute}:${second}`
+    timerTime.value = `${hour}:${minute}:${second}`
+
+    const year = serverNow.getFullYear()
+    const month = pad(serverNow.getMonth() + 1)
+    const day = pad(serverNow.getDate())
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const week = weekdays[serverNow.getDay()]
+    timerDate.value = `${year}年${month}月${day}日 ${week}`
 }
 
-// fetchData 从后端获取统计数据和初始服务器时间
 const fetchData = async () => {
     loading.value = true
     try {
-        // 请求总调用统计
         const resStats = await fetch('/api/stats').then(r => r.json())
         stats.value = resStats.total_tools_usage || []
         
-        // --- 核心时间校准逻辑 ---
-        // 后端返回的是格式化的服务器时间字符串 (如 "2023-10-01 12:00:00")
-        // 我们需要解析它，并计算它与本地时间的差值
-        
-        // 1. 解析服务器时间字符串
         const [dStr, tStr] = resStats.server_time.split(' ')
         const [y, m, d] = dStr.split('-').map(Number)
         const [hh, mm, ss] = tStr.split(':').map(Number)
-        // 注意：Month 需要减 1 (0-11)
         const serverDate = new Date(y, m - 1, d, hh, mm, ss)
-        
-        // 2. 计算偏移量 (服务器时间 - 本地接收到响应的时间)
         timeOffset = serverDate.getTime() - Date.now()
         
-        // 3. 立即更新一次 UI，并启动定时器
         updateTime() 
         if (timer) clearInterval(timer)
         timer = setInterval(updateTime, 1000)
 
-        // 请求趋势数据
         const resTrend = await fetch('/api/stats/trend').then(r => r.json())
         trendData.value = resTrend.trend || []
     } catch (e) {
-        console.error("无法获取统计数据:", e)
+        console.error(e)
     } finally {
         loading.value = false
     }
 }
 
-// 组件卸载时清理定时器，防止内存泄漏
 onUnmounted(() => {
     if (timer) clearInterval(timer)
 })
 
-// ==========================================
-// 3. 图表配置
-// ==========================================
+// 3. 计算属性 (中文)
+const totalCalls = computed(() => stats.value.reduce((sum, item) => sum + item.count, 0))
 
-// 预定义一组鲜艳的颜色，用于图表展示
-const chartColors = ['#41B883', '#E46651', '#00D8FF', '#DD1B16', '#F7DF1E', '#3178C6', '#9B59B6', '#34495E']
+// 缩写映射逻辑
+const getToolAbbr = (name) => {
+    const map = {
+        'json': 'JSON',
+        'sql': 'SQL',
+        'number': 'BASE',
+        'qrcode': 'QR',
+        'color': 'COLOR',
+        'text': 'TEXT',
+        'timestamp': 'TIME'
+    }
+    // 默认转大写
+    return map[name.toLowerCase()] || name.toUpperCase()
+}
 
-// 计算属性：生成饼图所需的数据结构
+const topTool = computed(() => { 
+    if (stats.value.length > 0) {
+        return getToolAbbr(stats.value[0].tool_name)
+    }
+    return 'N/A'
+})
+const activeToolsCount = computed(() => stats.value.length)
+
+// Apple Color Palette
+const colors = [
+    '#007AFF', // System Blue
+    '#34C759', // System Green
+    '#FF9500', // System Orange
+    '#FF2D55', // System Pink
+    '#AF52DE', // System Purple
+    '#5856D6', // System Indigo
+    '#5AC8FA', // System Teal
+    '#8E8E93'  // System Gray
+]
+
 const pieChartData = computed(() => {
     if (!stats.value.length) return { labels: [], datasets: [] }
+    // 使用缩写显示在图表中? 用户只说 "最常使用TOPtool中显示的工具都大写显示缩写"
+    // 图表标签也可以跟随缩写，更简洁
     return {
-        labels: stats.value.map(s => s.tool_name),
+        labels: stats.value.map(s => getToolAbbr(s.tool_name)),
         datasets: [{
-            backgroundColor: chartColors,
+            backgroundColor: colors,
             data: stats.value.map(s => s.count),
-            borderWidth: 0
+            borderWidth: 2,
+            borderColor: '#ffffff',
+            hoverOffset: 4
         }]
     }
 })
 
-// 计算属性：生成折线图所需的数据结构
 const lineChartData = computed(() => {
     if (!trendData.value.length) return { labels: [], datasets: [] }
-    
-    // 1. 提取所有唯一的日期和工具名称
     const dates = [...new Set(trendData.value.map(t => t.date))].sort()
-    const tools = [...new Set(trendData.value.map(t => t.tool_name))]
+    const top3Tools = stats.value.slice(0, 3).map(s => s.tool_name)
     
-    // 2. 构建每个工具的数据集
-    const datasets = tools.map((tool, index) => {
-        const color = chartColors[index % chartColors.length]
-        // 映射每天的数据，如果某天没有数据则补 0
+    const datasets = top3Tools.map((tool, index) => {
+        const color = colors[index]
         const data = dates.map(date => {
             const entry = trendData.value.find(t => t.date === date && t.tool_name === tool)
             return entry ? entry.count : 0
         })
         return {
-            label: tool,
-            backgroundColor: color,
+            label: getToolAbbr(tool), // 缩写
+            backgroundColor: (ctx) => {
+                const canvas = ctx.chart.ctx;
+                const gradient = canvas.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, color + '66'); // 40% opacity
+                gradient.addColorStop(1, color + '00'); // 0% opacity
+                return gradient;
+            },
             borderColor: color,
             data: data,
-            fill: false,
-            tension: 0.4 // 曲线平滑度
+            fill: true, // 开启面积图填充
+            tension: 0.4, // 平滑曲线
+            pointRadius: 0, // 默认不显示点，更干净
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#fff',
+            pointBorderWidth: 2,
+            borderWidth: 2
         }
     })
     
     return { labels: dates, datasets }
 })
 
-// 饼图配置选项
-const pieOptions = {
+const commonOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
         legend: {
-            position: 'right',
-            labels: { color: '#374151' } // 适配浅色主题文字颜色
+            position: 'bottom',
+            labels: { 
+                usePointStyle: true, 
+                padding: 20,
+                color: '#8E8E93',
+                font: { size: 12, family: "-apple-system, BlinkMacSystemFont, sans-serif" }
+            }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#000',
+            bodyColor: '#333',
+            borderColor: 'rgba(0,0,0,0.05)',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 10, // 更圆润
+            titleFont: { size: 13, weight: 600, family: "-apple-system, BlinkMacSystemFont, sans-serif" },
+            bodyFont: { size: 12, family: "-apple-system, BlinkMacSystemFont, sans-serif" },
+            displayColors: true,
+            boxWidth: 8,
+            boxHeight: 8,
+            usePointStyle: true,
+            // 阴影
+            callbacks: {
+                labelTextColor: () => '#333'
+            }
         }
     }
 }
 
-// 折线图配置选项
 const lineOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+    ...commonOptions,
     scales: {
         y: {
             beginAtZero: true,
-            ticks: { color: '#6b7280', stepSize: 1 },
-            grid: { color: '#e5e7eb' }
+            border: { display: false },
+            grid: { color: '#F2F2F7', drawBorder: false }, // 极淡网格
+            ticks: { color: '#C7C7CC', padding: 10, font: { family: "-apple-system, BlinkMacSystemFont, sans-serif" } }
         },
         x: {
-            ticks: { color: '#6b7280' },
-            grid: { color: '#e5e7eb' }
+            grid: { display: false, drawBorder: false },
+            ticks: { color: '#C7C7CC', padding: 10, font: { family: "-apple-system, BlinkMacSystemFont, sans-serif" } }
         }
     },
-    plugins: {
-        legend: {
-            labels: { color: '#374151' }
-        }
+    interaction: {
+        mode: 'index',
+        intersect: false,
     },
-    elements: {
-        point: {
-            radius: 5,     // 数据点大小
-            hoverRadius: 7 // 悬停时放大
-        },
-        line: {
-            tension: 0.4   // 贝塞尔曲线
-        }
-    }
 }
 
-// 挂载时自动获取数据
 onMounted(fetchData)
 </script>
 
 <template>
-  <div class="stats-container">
-    <!-- 顶部标题栏 -->
-    <div class="header-row">
-        <div>
-            <h2>工具调用统计</h2>
-            <div class="server-time">Server Time: {{ serverTime }}</div>
+  <div class="dashboard-container">
+    <!-- Header -->
+    <div class="header-section">
+        <div class="title-group">
+            <h1>System Status</h1>
         </div>
         <button @click="fetchData" class="refresh-btn">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            刷新
+            <span>刷新</span>
         </button>
     </div>
-    
-    <!-- 加载中状态 -->
-    <div v-if="loading" class="loading">
-        <div class="spinner"></div> 加载数据中...
+
+    <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
     </div>
-    
-    <!-- 数据内容区域 -->
-    <div v-else class="content-wrapper">
-        <div v-if="stats.length === 0" class="empty-state">
-            暂无统计数据
+
+    <div v-else class="grid-layout">
+        <!-- Metrics - Apple Style: Glass / Clean White -->
+        <div class="card metric-card">
+            <div class="metric-label">服务器时间</div>
+            <div class="metric-value time-val">{{ timerTime }}</div>
+            <div class="metric-sub">{{ timerDate }}</div>
+        </div>
+
+        <div class="card metric-card">
+            <div class="metric-label">Total Calls</div>
+            <div class="metric-value">{{ totalCalls }}</div>
+             <div class="metric-sub">累计请求量</div>
+        </div>
+
+        <div class="card metric-card">
+            <div class="metric-label">Top Tool</div>
+            <div class="metric-value text-ellipsis" style="color:#007AFF">{{ topTool }}</div>
+             <div class="metric-sub">最常使用</div>
+        </div>
+
+        <div class="card metric-card">
+            <div class="metric-label">Active Tools</div>
+            <div class="metric-value">{{ activeToolsCount }}</div>
+             <div class="metric-sub">在线服务</div>
+        </div>
+
+        <!-- Charts -->
+        <div class="card chart-card line-chart-area">
+             <div class="card-header">
+                <h3>Last 7 Days Trend</h3>
+             </div>
+             <div class="chart-box">
+                <Line :data="lineChartData" :options="lineOptions" />
+             </div>
+        </div>
+
+        <div class="card chart-card pie-chart-area">
+            <div class="card-header">
+                <h3>工具分布</h3>
+            </div>
+            <div class="chart-box">
+                <Pie :data="pieChartData" :options="commonOptions" />
+            </div>
         </div>
         
-        <div v-else class="charts-grid">
-            <!-- 饼图卡片 -->
-            <div class="card">
-                <h3>工具使用占比</h3>
-                <div class="chart-wrapper">
-                    <Pie :data="pieChartData" :options="pieOptions" />
-                </div>
+        <!-- Table -->
+        <div class="card table-card">
+            <div class="card-header">
+                <h3>详细报表</h3>
             </div>
-            
-            <!-- 折线图卡片 -->
-            <div class="card full-width">
-                <h3>7日使用趋势</h3>
-                <div class="chart-wrapper">
-                    <Line :data="lineChartData" :options="lineOptions" />
-                </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>TOOL NAME</th>
+                            <th class="text-right">CALLS</th>
+                            <th class="text-right">SHARE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in stats" :key="item.tool_name">
+                            <td class="font-medium">{{ getToolAbbr(item.tool_name) }}</td>
+                            <td class="text-right num-font" style="font-weight:600">{{ item.count }}</td>
+                            <td class="text-right text-gray num-font">
+                                {{ ((item.count / totalCalls) * 100).toFixed(1) }}%
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        </div>
-        
-        <!-- 底部详细数据表格 -->
-        <div v-if="stats.length > 0" class="card mt-4">
-             <h3>详细数据</h3>
-             <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>工具名称</th>
-                        <th>总调用次数</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in stats" :key="item.tool_name">
-                        <td>{{ item.tool_name }}</td>
-                        <td>{{ item.count }}</td>
-                    </tr>
-                </tbody>
-             </table>
         </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.stats-container {
-    padding: 0;
-    max-width: 1200px;
+/* Apple System Fonts Stack - Clean & Native */
+.dashboard-container {
+    max-width: 1400px;
     margin: 0 auto;
-    color: var(--text-primary);
-    animation: fadeIn 0.4s ease-out;
+    padding: 32px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #1d1d1f; 
+    /* Apple 浅灰背景 */
+    background: #F5F5F7; 
+    min-height: calc(100vh - 80px);
 }
 
-.header-row {
+/* Header */
+.header-section {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
-
-h2 { margin: 0; font-size: 1.25rem; font-weight: 600; color: #111827; }
-h3 { margin: 0 0 16px 0; font-size: 1rem; font-weight: 600; color: #111827; }
-
-.server-time { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+.title-group h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #1d1d1f;
+    letter-spacing: -0.01em;
+}
 
 .refresh-btn {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     background: white;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+    border: none;
+    border-radius: 99px; /* Pill shape */
     padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: all 0.2s;
+    font-size: 13px;
     font-weight: 500;
+    color: #007AFF;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+    transition: all 0.2s;
 }
-.refresh-btn:hover { background: #f9fafb; border-color: #d1d5db; }
-.refresh-btn:active { transform: translateY(1px); }
+.refresh-btn:hover { 
+    background: #f2f2f7;
+    transform: scale(1.02);
+}
+.refresh-btn:active { transform: scale(0.98); }
 
-/* Grid 布局：大屏显示两列，小屏单列 */
-.charts-grid {
+/* Grid */
+.grid-layout {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto auto auto; 
     gap: 20px;
 }
 
-@media (min-width: 1024px) {
-    .charts-grid { grid-template-columns: 1fr 2fr; } /* 饼图占 1/3，折线图占 2/3 */
-}
-
+/* Card - Apple Style: Soft, White, Minimal Shadow */
 .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    background: white;
+    border-radius: 18px; /* 更大的圆角 */
     padding: 24px;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 24px -1px rgba(0,0,0,0.04); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+    box-shadow: 0 8px 30px -5px rgba(0,0,0,0.08); 
+    transform: translateY(-2px);
 }
 
-.chart-wrapper {
-    height: 300px;
-    position: relative;
-}
-
-.mt-4 { margin-top: 20px; }
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 8px;
-}
-.data-table th, .data-table td {
-    text-align: left;
-    padding: 12px;
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.9rem;
-}
-.data-table th { color: var(--text-secondary); font-weight: 500; background: #f9fafb; }
-.data-table td { color: var(--text-primary); }
-.data-table tr:last-child td { border-bottom: none; }
-
-.loading {
+/* Metric Cards */
+.metric-card {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    min-height: 140px;
+}
+
+.metric-label {
+    font-size: 13px;
+    color: #86868b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.metric-value {
+    font-size: 38px;
+    font-weight: 700;
+    color: #1d1d1f;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 12px 0;
+}
+.metric-sub {
+    font-size: 13px;
+    color: #86868b;
+}
+.time-val {
+    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+    font-variant-numeric: tabular-nums; 
+}
+
+/* Chart Areas */
+.line-chart-area {
+    grid-column: span 3;
+    height: 440px;
+    display: flex;
+    flex-direction: column;
+}
+.pie-chart-area {
+    grid-column: span 1;
+    height: 440px;
+    display: flex;
+    flex-direction: column;
+}
+.table-card {
+    grid-column: span 4;
+}
+
+.card-header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid #f5f5f7;
+    padding-bottom: 12px;
+}
+.card-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    color: #1d1d1f;
+}
+
+.chart-box {
+    flex: 1;
+    position: relative;
+    min-height: 0; 
+}
+
+/* Table - Clean List */
+.table-responsive { width: 100%; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th { 
+    text-align: left; 
+    font-size: 11px; 
+    color: #86868b; 
+    font-weight: 600; 
+    padding: 12px 0; 
+    border-bottom: 1px solid #e5e5ea;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+td { 
+    font-size: 14px; 
+    padding: 16px 0; 
+    color: #1d1d1f; 
+    border-bottom: 1px solid #f5f5f7;
+}
+tr:last-child td { border-bottom: none; }
+.text-right { text-align: right; }
+.font-medium { font-weight: 500; }
+.text-gray { color: #86868b; }
+.num-font { font-variant-numeric: tabular-nums; }
+
+/* Utilities */
+.text-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Loading */
+.loading-state {
+    height: 400px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    height: 300px;
-    color: var(--text-secondary);
 }
-
 .spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid var(--border-color);
+    width: 32px; height: 32px;
+    border: 3px solid #f5f5f7;
+    border-top-color: #007AFF; 
     border-radius: 50%;
-    border-top-color: var(--accent);
-    animation: spin 1s linear infinite;
-    margin-bottom: 16px;
+    animation: spin 0.8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+/* Responsive */
+@media (max-width: 1024px) {
+    .grid-layout { grid-template-columns: repeat(2, 1fr); }
+    .line-chart-area, .pie-chart-area, .table-card { grid-column: span 2; }
+}
+@media (max-width: 640px) {
+    .grid-layout { grid-template-columns: 1fr; }
+    .line-chart-area, .pie-chart-area, .table-card, .metric-card { grid-column: span 1; }
+}
 </style>

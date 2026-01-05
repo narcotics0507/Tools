@@ -87,8 +87,8 @@ const clear = () => {
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-sm btn-outline" @click="clear">清空</button>
-            <button class="btn btn-sm btn-outline" @click="copyResult">复制右侧</button>
+            <button class="btn btn-outline" @click="clear">清空</button>
+            <button class="btn btn-outline" @click="copyResult">复制右侧</button>
         </div>
     </div>
 
@@ -125,11 +125,7 @@ const clear = () => {
 
 <style scoped>
 /* 撑满除了顶部导航外的高度 */
-.full-height {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 100px);
-}
+/* Global .full-height used */
 
 .section-header {
     margin-bottom: 0;
@@ -229,10 +225,7 @@ const clear = () => {
     width: 100%;
 }
 
-.btn-sm {
-    padding: 4px 12px;
-    font-size: 12px;
-}
+
 
 /* 自定义滚动条 (Webkit) */
 ::-webkit-scrollbar {

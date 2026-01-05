@@ -108,8 +108,8 @@ const copyResult = () => {
     <div class="panel">
       <label class="label">输入表达式 (反解析)</label>
       <div style="display: flex; gap: 8px;">
-        <input v-model="cronInputStr" placeholder="例: 30 2 * * 1" class="mono-input">
-        <button class="btn btn-blue" @click="parseCronString">解析并回填</button>
+        <input v-model="cronInputStr" placeholder="例: 30 2 * * 1" class="code-area">
+        <button class="btn btn-primary" @click="parseCronString">解析并回填</button>
       </div>
 
       <!-- 预测结果显示区域 -->
@@ -179,11 +179,19 @@ const copyResult = () => {
 </template>
 
 <style scoped>
-.panel { background: #f9fafb; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; }
+.panel { background: #f9fafb; padding: 16px; border-radius: var(--radius-sm); border: 1px solid rgba(0,0,0,0.05); }
 .label { display:block; font-size:11px; font-weight:600; color:#6b7280; margin-bottom:6px; text-transform:uppercase; }
 .sub-label { font-size:12px; font-weight:600; color:#374151; margin-bottom:8px; }
-.mono-input { font-family: var(--font-mono); font-size: 13px; }
-.time-badge { background:#eef2ff; color:#4338ca; padding:2px 8px; border-radius:4px; font-size:11px; font-family:var(--font-mono); border: 1px solid #e0e7ff; }
+.time-badge { 
+    background:#eff6ff; 
+    color:#2563eb; 
+    padding:6px 12px; /* Larger padding */
+    border-radius:99px; /* Pill shape */
+    font-size:13px; /* Larger text */
+    font-family:var(--font-mono); 
+    border: 1px solid #bfdbfe; /* Visible border */
+    font-weight: 600;
+}
 .error-msg { color: #ef4444; font-size: 12px; }
 .desc-text { color:#6b7280; font-size:13px; }
 

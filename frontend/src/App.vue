@@ -12,7 +12,13 @@ import Stats from './components/Stats.vue'
 import RegexTool from './components/RegexTool.vue'
 import UuidTool from './components/UuidTool.vue'
 import HashTool from './components/HashTool.vue'
+
 import DiffTool from './components/DiffTool.vue'
+import SqlTool from './components/SqlTool.vue'
+import NumberTool from './components/NumberTool.vue'
+import QrcodeTool from './components/QrcodeTool.vue'
+import ColorTool from './components/ColorTool.vue'
+import TextTool from './components/TextTool.vue'
 
 // ==========================================
 // 1. 状态管理
@@ -32,6 +38,11 @@ const isMobileMenuOpen = ref(false)
 const tabs = [
   { id: 'announcement', name: '公告页', icon: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>' },
   { id: 'diff', name: '文本对比', icon: '<path d="M16 3h5v5M4 20L21 3M21 16v5h-5M3 21l8.5-8.5"></path>'},
+  { id: 'sql', name: 'SQL 格式化', icon: '<path d="M4 6c0 1.66 3.58 3 8 3s8-1.34 8-3-3.58-3-8-3-8 1.34-8 3"/><path d="M4 6v6c0 1.66 3.58 3 8 3s8-1.34 8-3V6"/><path d="M4 12v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6"/>' },
+  { id: 'number', name: '进制转换', icon: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>' },
+  { id: 'qrcode', name: '二维码生成', icon: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect>' },
+  { id: 'color', name: '颜色转换', icon: '<circle cx="12" cy="12" r="10"/><path d="M12 2a9.96 9.96 0 0 1 6.3 3.4L12 12V2z"/><path d="M12 12l6.3 6.6A9.96 9.96 0 0 1 12 22V12z"/><path d="M12 12V2a9.96 9.96 0 0 0-6.3 3.4L12 12z"/><path d="M12 22a9.96 9.96 0 0 1-6.3-3.4L12 12v10z"/>' },
+  { id: 'text', name: '文本大小写', icon: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>' },
   { id: 'timestamp', name: '时间戳工具', icon: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>' },
   { id: 'url', name: 'URL 编解码', icon: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>' },
   { id: 'json', name: 'JSON 工具', icon: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' },
@@ -110,7 +121,7 @@ const selectTab = (id) => {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" v-html="tab.icon"></svg> {{ tab.name }}
         </li>
       </ul>
-      <div style="padding:16px; font-size:11px; color:#9ca3af; text-align:center; margin-top: auto;">v1.0.5</div>
+      <div style="padding:16px; font-size:11px; color:#9ca3af; text-align:center; margin-top: auto;">v1.0.6</div>
     </nav>
 
     <!-- ========================================== -->
@@ -131,6 +142,12 @@ const selectTab = (id) => {
         <HashTool v-if="currentTab === 'hash'" :report-event="reportEvent" />
 
         <Stats v-if="currentTab === 'stats'" />
+
+        <SqlTool v-if="currentTab === 'sql'" :report-event="reportEvent" />
+        <NumberTool v-if="currentTab === 'number'" :report-event="reportEvent" />
+        <QrcodeTool v-if="currentTab === 'qrcode'" :report-event="reportEvent" />
+        <ColorTool v-if="currentTab === 'color'" :report-event="reportEvent" />
+        <TextTool v-if="currentTab === 'text'" :report-event="reportEvent" />
     </main>
   </div>
 </template>
@@ -140,25 +157,27 @@ const selectTab = (id) => {
 /* 全局样式与变量定义 */
 /* ========================================== */
 :root {
-  --primary: #2563eb;       /* 主色调 (蓝色) */
-  --primary-hover: #1d4ed8; /* 悬停深蓝 */
-  --bg-page: #f3f4f6;       /* 页面背景灰 */
-  --bg-sidebar: #ffffff;    /* 侧边栏白 */
-  --bg-card: #ffffff;       /* 卡片白 */
-  --text-primary: #111827;  /* 主要文字黑 */
-  --text-secondary: #6b7280;/* 次要文字灰 */
-  --border-color: #e5e7eb;  /* 边框颜色 */
-  --accent: #f59e0b;        /* 强调色 (Amber) */
-  --radius-sm: 6px;
-  --radius-md: 8px;
+  --primary: #007aff;       /* Apple Blue */
+  --primary-hover: #0071e3;
+  --bg-page: #f5f5f7;       /* Apple Light Gray */
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #1d1d1f;  /* Apple Dark */
+  --text-secondary: #86868b;
+  --border-color: #d1d1d6;
+  --accent: #f59e0b;
+  --radius-sm: 8px;
+  --radius-md: 12px;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: var(--bg-page);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; /* Add this for better font rendering */
+  text-rendering: optimizeLegibility; /* Improve readability */
 }
 
 #app-container {
@@ -190,7 +209,7 @@ body {
   padding: 0 24px;
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text-primary); /* Change from var(--primary) to var(--text-primary) which is black */
   border-bottom: 1px solid var(--border-color);
   cursor: pointer;
 }
@@ -198,7 +217,7 @@ body {
 .brand-icon {
     width: 32px;
     height: 32px;
-    background: var(--primary);
+    background: #1d1d1f; /* Apple Black */
     color: white;
     border-radius: 8px;
     display: flex;

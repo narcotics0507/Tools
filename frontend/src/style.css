@@ -1,171 +1,377 @@
-/* frontend/src/style.css */
-
-/* 引入 Inter 字体 (精致、现代) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-
+/* --- Apple Style (Modern & Airy) --- */
 :root {
-  /* --- 2025 精致版变量 --- */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Menlo', monospace;
-  --bg-body: #f9fafb;          /* 极简灰白 */
-  --bg-sidebar: #ffffff;
-  --bg-card: #ffffff;
-  --text-primary: #374151;     /* 柔和深灰，不刺眼 */
-  --text-secondary: #6b7280;
-  --accent: #2563eb;           /* 专业蓝 */
-  --accent-light: rgba(37, 99, 235, 0.08);
-  --border-color: #e5e7eb;     /* 极细边框色 */
-  --sidebar-width: 200px;      /* 缩窄侧边栏 */
-  --radius-sm: 6px;            /* 小圆角，更硬朗 */
-  --radius-md: 8px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+    --bg-body: #f5f5f7;
+    /* Apple 浅灰背景 */
+    --bg-sidebar: #ffffff;
+    --bg-card: #ffffff;
+    --text-primary: #1d1d1f;
+    /* Apple 深黑 */
+    --text-secondary: #86868b;
+    /* Apple 浅灰文字 */
+    --accent: #007aff;
+    /* Apple System Blue */
+    --accent-light: rgba(0, 122, 255, 0.1);
+    --border-color: #d1d1d6;
+    /* Apple 边框色 */
+    --sidebar-width: 240px;
+    /* 稍宽更大气 */
+    --radius-sm: 8px;
+    /* 小圆角 */
+    --radius-md: 12px;
+    /* 标准大圆角 */
+    --radius-lg: 18px;
+    /* 卡片圆角 */
 }
 
-/* 全局重置：基准字号下调至 13px */
-html, body {
-  margin: 0; padding: 0; height: 100%; width: 100%;
-  font-family: var(--font-sans);
-  background-color: var(--bg-body);
-  color: var(--text-primary);
-  font-size: 13px;             /* <--- 核心改变：更小 */
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+/* 全局重置 */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    font-family: var(--font-sans);
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
 }
 
-#app, #app-container { height: 100%; width: 100%; display: flex; overflow: hidden; }
+#app,
+#app-container {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+}
 
 /* 强制统一控件字体与大小 */
-input, button, textarea, select {
-  font-family: inherit;
-  font-size: 13px;
+input,
+button,
+textarea,
+select {
+    font-family: inherit;
+    font-size: 13px;
 }
 
-/* --- 侧边栏 (Compact) --- */
-.sidebar {
-  width: var(--sidebar-width);
-  background: var(--bg-sidebar);
-  border-right: 1px solid var(--border-color);
-  display: flex; flex-direction: column; flex-shrink: 0; z-index: 100;
-}
 
-.brand {
-  height: 56px; /* 降低高度 */
-  display: flex; align-items: center; padding: 0 20px;
-  font-size: 14px; font-weight: 600; gap: 10px; color: #111827;
-  letter-spacing: -0.01em;
-}
-
-.brand-icon {
-  width: 24px; height: 24px; background: #111827; color: white;
-  border-radius: 6px; display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: bold;
-}
-
-.nav-menu { padding: 12px; margin: 0; flex-grow: 1; list-style: none; }
-
-.nav-item {
-  padding: 8px 12px; /* 缩小内边距 */
-  cursor: pointer; transition: all 0.15s;
-  display: flex; align-items: center;
-  font-size: 13px; color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  margin-bottom: 2px; font-weight: 500;
-}
-
-.nav-item:hover { background-color: #f3f4f6; color: #111827; }
-.nav-item.active { background-color: var(--accent-light); color: var(--accent); font-weight: 600; }
-.nav-item svg { width: 16px; height: 16px; margin-right: 10px; stroke-width: 1.5px; }
 
 /* --- 内容区 --- */
 .main-content {
-  flex-grow: 1; padding: 24px; /* 减少留白 */
-  overflow-y: auto;
+    flex-grow: 1;
+    padding: 32px;
+    overflow-y: auto;
 }
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 20px; /* 卡片更紧凑 */
-  margin-bottom: 20px;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* 极淡边框 */
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    /* Apple Soft Shadow */
+    transition: all 0.2s ease;
 }
 
 .section-header {
-  font-size: 14px; font-weight: 600; color: #111827;
-  margin-bottom: 16px; display: flex; align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
 }
 
-/* --- 控件优化 (精致感来源) --- */
+/* --- 控件优化 (Apple Control Style) --- */
 .btn {
-  height: 32px; /* <--- 核心：降低高度 */
-  padding: 0 14px;
-  font-size: 12px; font-weight: 500;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  cursor: pointer; transition: all 0.15s;
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  white-space: nowrap;
+    height: 38px;
+    /* 增加高度 */
+    padding: 0 20px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
 }
 
-.btn-primary { background-color: #111827; color: white; }
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-
-.btn-outline { background: #fff; border-color: var(--border-color); color: var(--text-primary); }
-.btn-outline:hover { border-color: #d1d5db; background-color: #f9fafb; }
-
-.btn-blue { background-color: var(--accent); color: white; }
-.btn-blue:hover { background-color: #1d4ed8; }
-
-textarea, input, select {
-  width: 100%;
-  padding: 6px 10px; /* 缩小输入框内边距 */
-  height: 32px;      /* 固定高度，对齐按钮 */
-  font-size: 13px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  outline: none; transition: all 0.15s;
-  background: #fff; color: var(--text-primary);
-}
-textarea { height: auto; line-height: 1.5; padding: 10px; }
-
-textarea:focus, input:focus, select:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-light);
+.btn-primary {
+    background-color: #007aff;
+    color: white;
 }
 
-.code-area, input[class*="mono"] { font-family: var(--font-mono) !important; font-size: 12px; }
+.btn-primary:active {
+    opacity: 0.8;
+    transform: scale(0.98);
+}
+
+.btn-outline {
+    background: #fff;
+    border: 1px solid #d1d1d6;
+    color: #1d1d1f;
+}
+
+.btn-outline:hover {
+    border-color: #8e8e93;
+    background-color: #f5f5f7;
+}
+
+.btn-outline:active {
+    background-color: #efeff4;
+}
+
+.btn-text {
+    background: transparent;
+    color: #007aff;
+    border: none;
+    padding: 0 10px;
+}
+
+.btn-text:hover {
+    background: rgba(0, 122, 255, 0.05);
+}
+
+textarea,
+input,
+select {
+    width: 100%;
+    padding: 8px 12px;
+    height: 38px;
+    /* 对齐按钮 */
+    font-size: 14px;
+    border: 1px solid #d1d1d6;
+    border-radius: var(--radius-sm);
+    outline: none;
+    transition: all 0.2s;
+    background: #fff;
+    color: var(--text-primary);
+}
+
+textarea {
+    height: auto;
+    line-height: 1.5;
+    padding: 12px;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+    /* 蓝色光晕 */
+}
+
+.code-area,
+input[class*="mono"] {
+    font-family: var(--font-mono) !important;
+    font-size: 12px;
+}
 
 /* --- Crond 网格 (微型化) --- */
-.tab-bar { display: flex; gap: 2px; padding: 3px; background: #f3f4f6; border-radius: var(--radius-sm); width: fit-content; margin-bottom: 16px; }
-.tab-btn { padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--text-secondary); transition: 0.15s; font-weight: 500;}
-.tab-btn.active { background: #fff; color: var(--accent); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.tab-bar {
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    background: #f3f4f6;
+    border-radius: var(--radius-sm);
+    border: 1px solid #e5e7eb;
+    width: fit-content;
+    margin-bottom: 16px;
+}
 
-.month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; max-width: 260px; }
-.grid-item { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; transition: all 0.1s; }
-.grid-item:hover { border-color: var(--accent); color: var(--accent); }
-.grid-item.active { background: var(--accent); color: white; border-color: var(--accent); }
+.tab-btn {
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text-secondary);
+    transition: 0.15s;
+    font-weight: 500;
+}
+
+.tab-btn.active {
+    background: #fff;
+    color: var(--accent);
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    max-width: 260px;
+}
+
+.grid-item {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    transition: all 0.1s;
+}
+
+.grid-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.grid-item.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
 
 /* 滚动条 */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
 
 /* Force Monaco Editor Scrollbar Style */
 .monaco-editor .scrollbar .slider {
-  background: #e5e7eb !important;
-  border-radius: 3px !important;
-  width: 6px !important; /* Force width */
-  left: 0 !important; /* Ensure alignment */
+    background: #e5e7eb !important;
+    border-radius: 3px !important;
+    width: 6px !important;
+    /* Force width */
+    left: 0 !important;
+    /* Ensure alignment */
 }
+
 .monaco-editor .scrollbar .slider:hover {
-  background: #d1d5db !important;
+    background: #d1d5db !important;
 }
+
 .monaco-editor .scrollbar.vertical {
-  width: 6px !important;
+    width: 6px !important;
 }
+
 .monaco-editor .scrollbar.horizontal {
-  height: 6px !important;
+    height: 6px !important;
 }
+
 .monaco-editor .decorationsOverviewRuler {
-  display: none !important; /* Hide the ruler that adds width */
+    display: none !important;
+    /* Hide the ruler that adds width */
+}
+
+/* --- Global Layout Utils --- */
+.full-height {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 100px);
+}
+
+.dual-pane {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    overflow: hidden;
+}
+
+.pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* 极淡边框 */
+    border-radius: var(--radius-sm);
+    background: white;
+}
+
+.right-pane {
+    background: #f9fafb;
+}
+
+/* --- Input Groups (Restored & Polished) --- */
+.input-wrapper {
+    display: flex;
+    background: #fff;
+    border: 1px solid #c7c7cc;
+    /* Slightly darker for better contrast */
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 38px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    /* Extremely subtle depth */
+}
+
+.input-wrapper:focus-within {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.15);
+}
+
+.input-wrapper input {
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    height: 100%;
+    padding: 0 12px;
+}
+
+.input-wrapper button {
+    background: #f2f2f7;
+    /* Apple System Gray 6 */
+    border: none;
+    border-left: 1px solid #c7c7cc;
+    padding: 0 16px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.input-wrapper button:hover {
+    background: #e5e5ea;
+    /* Apple System Gray 5 */
+}
+
+.input-wrapper button:active {
+    background: #d1d1d6;
+}
+
+/* --- Premium Polish Overrides --- */
+/* Ensure inputs on white cards have clear definition */
+textarea,
+input,
+select {
+    border-color: #c7c7cc;
+    background: #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* QRCode Input Specific Fix */
+.qr-input-fix {
+    height: 120px !important;
+    /* Limit height */
+    font-family: var(--font-sans);
 }

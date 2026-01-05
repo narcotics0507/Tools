@@ -219,27 +219,27 @@ const copyHash = (text) => {
         <!-- MD5 结果 -->
         <div class="hash-item">
             <div class="label">MD5</div>
-            <div class="value-row">
+            <div class="input-wrapper">
                 <input type="text" readonly :value="hashes.md5" />
-                <button class="btn btn-sm" @click="copyHash(hashes.md5)">复制</button>
+                <button @click="copyHash(hashes.md5)">复制</button>
             </div>
         </div>
         
         <!-- SHA1 结果 -->
         <div class="hash-item">
             <div class="label">SHA1</div>
-            <div class="value-row">
+            <div class="input-wrapper">
                 <input type="text" readonly :value="hashes.sha1" />
-                <button class="btn btn-sm" @click="copyHash(hashes.sha1)">复制</button>
+                <button @click="copyHash(hashes.sha1)">复制</button>
             </div>
         </div>
         
         <!-- SHA256 结果 -->
         <div class="hash-item">
             <div class="label">SHA256</div>
-            <div class="value-row">
+            <div class="input-wrapper">
                 <input type="text" readonly :value="hashes.sha256" />
-                <button class="btn btn-sm" @click="copyHash(hashes.sha256)">复制</button>
+                <button @click="copyHash(hashes.sha256)">复制</button>
             </div>
         </div>
     </div>
@@ -260,15 +260,5 @@ const copyHash = (text) => {
 
 .hash-list { display: flex; flex-direction: column; gap: 16px; }
 .hash-item .label { font-size: 0.85rem; font-weight: 600; color: #6b7280; margin-bottom: 4px; }
-.value-row { display: flex; gap: 8px; }
-.value-row input {
-    flex: 1;
-    padding: 8px 12px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-family: monospace;
-    color: #374151;
-}
-.btn-sm { padding: 4px 12px; font-size: 0.85rem; }
+/* Input wrapper styles moved to global style.css */
 </style>

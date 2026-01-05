@@ -71,10 +71,8 @@ const copy = () => {
 }
 
 .input-count {
-    padding: 6px 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
     width: 60px;
+    /* Visuals inherited from global input */
 }
 
 .result-area {
