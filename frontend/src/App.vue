@@ -1,24 +1,24 @@
 <script setup>
-import { ref, defineAsyncComponent } from 'vue'
+import { ref } from 'vue'
 
-// 引入各个功能组件 (Lazy Loading)
-const Announcement = defineAsyncComponent(() => import('./components/Announcement.vue'))
-const TimestampTool = defineAsyncComponent(() => import('./components/TimestampTool.vue'))
-const JsonTool = defineAsyncComponent(() => import('./components/JsonTool.vue'))
-const CronTool = defineAsyncComponent(() => import('./components/CronTool.vue'))
-const UrlTool = defineAsyncComponent(() => import('./components/UrlTool.vue'))
-const CryptoTool = defineAsyncComponent(() => import('./components/CryptoTool.vue'))
-const Stats = defineAsyncComponent(() => import('./components/Stats.vue'))
-const RegexTool = defineAsyncComponent(() => import('./components/RegexTool.vue'))
-const UuidTool = defineAsyncComponent(() => import('./components/UuidTool.vue'))
-const HashTool = defineAsyncComponent(() => import('./components/HashTool.vue'))
+// 引入各个功能组件
+import Announcement from './components/Announcement.vue'
+import TimestampTool from './components/TimestampTool.vue'
+import JsonTool from './components/JsonTool.vue'
+import CronTool from './components/CronTool.vue'
+import UrlTool from './components/UrlTool.vue'
+import CryptoTool from './components/CryptoTool.vue'
+import Stats from './components/Stats.vue'
+import RegexTool from './components/RegexTool.vue'
+import UuidTool from './components/UuidTool.vue'
+import HashTool from './components/HashTool.vue'
 
-const DiffTool = defineAsyncComponent(() => import('./components/DiffTool.vue'))
-const SqlTool = defineAsyncComponent(() => import('./components/SqlTool.vue'))
-const NumberTool = defineAsyncComponent(() => import('./components/NumberTool.vue'))
-const QrcodeTool = defineAsyncComponent(() => import('./components/QrcodeTool.vue'))
-const ColorTool = defineAsyncComponent(() => import('./components/ColorTool.vue'))
-const TextTool = defineAsyncComponent(() => import('./components/TextTool.vue'))
+import DiffTool from './components/DiffTool.vue'
+import SqlTool from './components/SqlTool.vue'
+import NumberTool from './components/NumberTool.vue'
+import QrcodeTool from './components/QrcodeTool.vue'
+import ColorTool from './components/ColorTool.vue'
+import TextTool from './components/TextTool.vue'
 
 // ==========================================
 // 1. 状态管理

@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 	"gorm.io/driver/sqlite"
@@ -142,9 +141,6 @@ func main() {
 	// 设置为发布模式 (减少控制台的调试日志输出)
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-
-	// 启用 Gzip 压缩 (DefaultCompression)
-	r.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	// 准备静态文件系统：从嵌入的 staticFiles 中提取 "dist" 子目录
 	distFS, err := fs.Sub(staticFiles, "dist")
