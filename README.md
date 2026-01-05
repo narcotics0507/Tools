@@ -10,7 +10,7 @@
     <a href="https://github.com/narcotics0507/Tools/stargazers"><img src="https://img.shields.io/github/stars/narcotics0507/Tools?color=ffcb47&labelColor=black&style=for-the-badge" alt="Stars"></a>
     <a href="https://github.com/narcotics0507/Tools/network/members"><img src="https://img.shields.io/github/forks/narcotics0507/Tools?color=blue&labelColor=black&style=for-the-badge" alt="Forks"></a>
     <a href="https://github.com/narcotics0507/Tools/blob/master/LICENSE"><img src="https://img.shields.io/github/license/narcotics0507/Tools?color=green&labelColor=black&style=for-the-badge" alt="License"></a>
-    <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/docker/v/isolatec/tools?color=blue&labelColor=black&style=for-the-badge&logo=docker&logoColor=white&label=latest" alt="Docker Latest"></a>
+    <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/badge/version-latest-blue?color=blue&labelColor=black&style=for-the-badge&logo=docker&logoColor=white" alt="Docker Version"></a>
     <a href="https://hub.docker.com/r/isolatec/tools"><img src="https://img.shields.io/docker/pulls/isolatec/tools?color=blue&labelColor=black&style=for-the-badge" alt="Docker Pulls"></a>
   </p>
   <p>
